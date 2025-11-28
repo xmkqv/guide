@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "cleanupPeriodDays": 90,
+  "includeCoAuthoredBy": false,
+  "permissions": {
+    "allow": [
+      "Read",
+      "Edit",
+      "Write",
+      "NotebookEdit",
+      "TodoWrite",
+      "Bash",
+      "Glob",
+      "Grep",
+      "Task",
+      "WebFetch",
+      "WebSearch",
+      "SlashCommand"
+    ],
+    "deny": [
+      "Read(**/*.pem)",
+      "Read(**/*.key)",
+      "Read(**/secrets/**)",
+      "Read(**/credentials/**)",
+      "Read(**/.aws/**)",
+      "Read(**/.ssh/**)",
+      "Read(**/docker-compose*.yml)",
+      "Write(**/.env*)",
+      "Write(**/*.pem)",
+      "Write(**/*.key)",
+      "Bash(rm -rf /)",
+      "Bash(rm -rf /*)",
+      "Bash(rm -rf ~)",
+      "Bash(rm -rf $HOME)",
+      "Bash(useradd:*)",
+      "Bash(userdel:*)",
+      "Bash(usermod:*)",
+      "Bash(passwd:*)",
+      "Bash(chown:*)",
+      "Bash(chmod 777:*)",
+      "Bash(sudo:*)",
+      "Bash(su:*)",
+      "Bash(doas:*)",
+      "Bash(reboot)",
+      "Bash(shutdown:*)",
+      "Bash(halt:*)",
+      "Bash(poweroff:*)",
+      "Bash(init:*)",
+      "Bash(systemctl:*)",
+      "Bash(service:*)",
+      "Bash(dd:*)",
+      "Bash(mkfs:*)",
+      "Bash(fdisk:*)",
+      "Bash(parted:*)",
+      "Bash(diskutil:*)",
+      "Bash(kill -9 1)",
+      "Bash(killall:*)",
+      "Bash(nmap:*)",
+      "Bash(masscan:*)",
+      "Bash(nikto:*)",
+      "Bash(sqlmap:*)",
+      "Bash(metasploit:*)",
+      "Bash(:*coin:*miner:*)",
+      "Bash(:*cryptominer:*)",
+      "Bash(:*xmrig:*)",
+      "Read(**/.git/**)",
+      "Read(**/dist/**)",
+      "Read(**/.next/**)",
+      "Read(**/.nuxt/**)",
+      "Read(**/coverage/**)",
+      "Read(**/__pycache__/**)",
+      "Read(**/.pytest_cache/**)",
+      "Read(**/venv/**)",
+      "Read(**/.venv/**)",
+      "Read(**/*.egg-info/**)",
+      "Read(**/.cargo/registry/**)",
+      "Read(**/target/debug/**)",
+      "Read(**/target/release/**)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/m/guides/qxgo/qxgo"
+          }
+        ]
+      }
+    ]
+  },
+  "alwaysThinkingEnabled": true,
+  "model": "sonnet"
+}

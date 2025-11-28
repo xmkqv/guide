@@ -1,0 +1,281 @@
+{
+  /*** WINDOW & WORKBENCH ***/
+  "window.zoomLevel": 2,
+  "workbench.iconTheme": "material-icon-theme",
+  "workbench.secondarySideBar.defaultVisibility": "hidden",
+  "workbench.sideBar.location": "right",
+  "workbench.activityBar.location": "bottom",
+  "zenMode.centerLayout": false,
+  "extensions.ignoreRecommendations": true,
+  "redhat.telemetry.enabled": false,
+  "security.workspace.trust.untrustedFiles": "open",
+  /*** EDITOR (GENERAL) ***/
+  "editor.fontSize": 14,
+  "editor.tabSize": 4,
+  "editor.indentSize": "tabSize",
+  "editor.lineNumbers": "interval",
+  "editor.guides.bracketPairs": true, // + line connecting brackets
+  "editor.guides.highlightActiveBracketPair": false, // + dims line connecting brackets
+  "editor.lightbulb.enabled": "off",
+  "editor.minimap.enabled": false,
+  "editor.folding": false, // clean up the sidebar
+  "editor.glyphMargin": false,
+  "editor.accessibilitySupport": "off",
+  "editor.autoClosingBrackets": "beforeWhitespace", // only auto-close brackets when before whitespace
+  "editor.unicodeHighlight.allowedCharacters": {
+    "α": true
+  },
+  // formatting
+  "editor.defaultFormatter": "biomejs.biome",
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.biome": "explicit",
+    "source.organizeImports.biome": "explicit",
+    "source.organizeImports": "never",
+    "source.addMissingImports": "always",
+    "source.removeUnusedImports": "always",
+    "source.fixAll": "never",
+    "source.sortImports": "never"
+  },
+  // BIOME
+  "biome.configurationPath": "/Users/m/biome.json",
+  "biome.suggestInstallingGlobally": false,
+  /*
+  - quick suggestion: suggest while typing
+  - 4 main types of completions:
+  - static syntax: based on static codebase analysis (syntax aware)
+  - emmet completions: suggestions for completing emmet experession
+  - snippets: code "chunks" either from extension or user defined
+  - word suggestions: suggestions based words, either present in the same doc or workspace (not syntax aware)
+  https://code.visualstudio.com/docs/editor/intellisense#_types-of-completions
+  https://www.reddit.com/r/vscode/comments/x9a5oe/totally_lost_in_with_vscode_suggestions/
+  */
+  "editor.suggest.showFiles": false,
+  "editor.suggest.showSnippets": true,
+  "editor.snippetSuggestions": "inline",
+  "editor.suggest.showWords": true,
+  "editor.suggest.filterGraceful": true,
+  "editor.suggest.localityBonus": true,
+  "editor.suggestSelection": "recentlyUsedByPrefix",
+  "editor.quickSuggestions": {
+    "other": "on",
+    "comments": "off",
+    "strings": true
+  },
+  "editor.tabCompletion": "on",
+  /*** GIT ***/
+  "git.autofetch": true,
+  "git.openRepositoryInParentFolders": "never",
+  "git.enableSmartCommit": true,
+  "git.confirmSync": false,
+  "git.ignoreMissingGitWarning": true,
+  /*** GITHUB COPILOT ***/
+  "github.copilot.editor.enableCodeActions": false,
+  "github.copilot.chat.useProjectTemplates": false,
+  "github.copilot.chat.terminalChatLocation": "terminal",
+  "github.copilot.nextEditSuggestions.enabled": true,
+  "github.copilot.enable": {
+    "*": true,
+    // it doesn't make sense, but yes, this is how it works
+    "markdown": true
+  },
+  /*** MATERIAL ICON THEME ***/
+  "material-icon-theme.folders.associations": {
+    // [icons](https://marketplace.visualstudio.com/items?itemName=PKief.material-icon-theme)
+    "files": "Other",
+    "node": "Cluster",
+    "tileEl": "Windows",
+    "link": "Unity",
+    "flux": "Mercurial"
+  },
+  "material-icon-theme.opacity": 0.7,
+  "material-icon-theme.activeIconPack": "none",
+  /*** FILES & SEARCH ***/
+  "files.exclude": {
+    "**/__pycache__": true
+  },
+  "search.exclude": {
+    "**/node_modules/**": true,
+    "**/dist/**": true,
+    "**/build/**": true,
+    "**/.git/**": true,
+    "*.egg-info": true,
+    "**/node_modules": true,
+    "**/__pycache__": true,
+    "**/.python-version": true,
+    "**/.ruff_cache": true,
+    "**/.pytest_cache": true,
+    "**/.coverage": true,
+    "**/*.egg-info": true,
+    "**/.DS_Store": true
+  },
+  "files.associations": {
+    "*.sql": "postgres",
+    ".env": "dotenv",
+    ".env.*": "dotenv",
+    ".svg": "svg",
+    "*.css": "css",
+    "settings.json": "jsonc"
+  },
+  "search.useIgnoreFiles": true,
+  /*** LANGUAGE-SPECIFIC SETTINGS ***/
+  /* markdown */
+  "markdownlint.configFile": "/Users/m/guides/configs/.markdownlint.json",
+  "markdown.validate.referenceLinks.enabled": "ignore", // allow [syntax like this]
+  "markdown.preview.scrollPreviewWithEditor": false, // prevents document scroll impacting the preview scroll
+  "markdown.preview.scrollEditorWithPreview": false,
+  "markdown.validate.enabled": true,
+  "[markdown]": {
+    "editor.unicodeHighlight.ambiguousCharacters": false,
+    "editor.unicodeHighlight.invisibleCharacters": false,
+    "diffEditor.ignoreTrimWhitespace": false,
+    "editor.wordWrap": "on",
+    "editor.wordWrapColumn": 80,
+    "editor.codeActionsOnSave": {
+      "source.fixAll.markdownlint": "explicit"
+    },
+    "editor.defaultFormatter": "fcrespo82.markdown-table-formatter"
+  },
+  /* postgresql */
+  "[postgres]": {
+    "editor.defaultFormatter": "bradymholt.pgformatter",
+    "editor.formatOnSave": true,
+    "editor.tabSize": 2
+  },
+  "pgFormatter.spaces": 2,
+  "pgFormatter.maxLineLength": 80,
+  "pgFormatter.commaEnd": false,
+  "pgFormatter.noComment": false,
+  "pgFormatter.formatType": true,
+  /* typescript/javascript */
+  "typescript.preferences.importModuleSpecifier": "shortest",
+  "typescript.tsserver.log": "off",
+  "typescript.updateImportsOnFileMove.enabled": "always",
+  "typescript.suggest.autoImports": true,
+  "typescript.suggest.paths": true,
+  "typescript.preferences.autoImportFileExcludePatterns": [
+    "**/dist/**",
+    "**/.dev/**",
+    "**/.demos/**",
+    "**/build/**",
+    "**/coverage/**"
+  ],
+  "typescript.preferences.autoImportSpecifierExcludeRegexes": [
+    "^node:inspector",
+    "^fs",
+    "fs/promises",
+    "^node:",
+    "^typescript",
+    "^assert",
+    "^console"
+  ],
+  "[typescript]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[javascriptreact]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  /* python */
+  "[python]": {
+    "editor.defaultFormatter": "charliermarsh.ruff", // black
+    "editor.formatOnSave": true,
+    "editor.fontSize": 14,
+    "editor.indentSize": "tabSize",
+    "editor.tabSize": 4,
+    "editor.codeActionsOnSave": {
+      "source.fixAll": "always",
+      "source.unusedImports": "always",
+      "source.organizeImports": "always"
+    }
+  },
+  "python.languageServer": "Pylance",
+  "python.analysis.autoImportCompletions": true,
+  "python.analysis.indexing": true,
+  "python.terminal.executeInFileDir": true,
+  "notebook.markup.fontSize": 13,
+  "notebook.outline.showCodeCells": true,
+  "notebook.output.fontSize": 12,
+  "notebook.cellToolbarLocation": {
+    "default": "left"
+  },
+  "notebook.cellToolbarVisibility": "hover",
+  "notebook.output.scrolling": true,
+  /* html */
+  "[html]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  /* css */
+  "[css]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "cssvar.enableHover": true,
+  "css.validate": false,
+  "unocss.root": ".",
+  "unocss.autocomplete.matchType": "fuzzy",
+  "unocss.colorPreview": true,
+  "unocss.underline": true,
+  "tailwindCSS.emmetCompletions": false,
+  /* json/jsonc */
+  "[json]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  },
+  /* graphql */
+  "[graphql]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  /* vue */
+  "[vue]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  /* svelte */
+  "[svelte]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  /* astro */
+  "[astro]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  /* shell script */
+  "[shellscript]": {
+    "editor.defaultFormatter": "foxundermoon.shell-format",
+    "editor.formatOnSave": true
+  },
+  "shellformat.flag": "-i 2 -ci -bn -sr",
+  "shellformat.effectLanguages": [
+    "shellscript",
+    "dockerfile",
+    "dotenv",
+    "hosts",
+    "jvmoptions",
+    "ignore",
+    "gitignore",
+    "properties",
+    "spring-boot-properties",
+    "azcli",
+    "bats"
+  ],
+  /* yaml */
+  "yaml.format.enable": false,
+  "yaml.format.printWidth": 200,
+  "yaml.format.proseWrap": "never",
+  /* docker compose */
+  "[dockercompose]": {
+    "editor.insertSpaces": true,
+    "editor.tabSize": 2,
+    "editor.autoIndent": "advanced",
+    "editor.defaultFormatter": "redhat.vscode-yaml"
+  },
+  /* github actions */
+  "[github-actions-workflow]": {
+    "editor.defaultFormatter": "redhat.vscode-yaml"
+  }
+}
