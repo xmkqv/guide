@@ -21,7 +21,7 @@ Modified qxgo to output **both formats**:
 
 ### Implementation
 
-Created `/Users/m/guides/qxgo/internal/hook/response.go` with a `BuildJSONResponse()` function that returns Claude Code-compatible JSON:
+Created `/Users/m/guide/qxgo/internal/hook/response.go` with a `BuildJSONResponse()` function that returns Claude Code-compatible JSON:
 
 ```json
 {
@@ -40,7 +40,7 @@ Modified `main.go` to:
 
 ### Key Changes
 
-**File**: `/Users/m/guides/qxgo/main.go:83-93`
+**File**: `/Users/m/guide/qxgo/main.go:83-93`
 
 ```go
 // Output JSON to stdout for Claude Code to read
@@ -121,12 +121,12 @@ The official format for PostToolUse hooks:
 
 ## Files Modified
 
-1. `/Users/m/guides/qxgo/internal/hook/response.go` - **New file** for JSON response building
-2. `/Users/m/guides/qxgo/main.go` - Modified to output JSON to stdout
-3. `/Users/m/guides/qxgo/qxgo` - Rebuilt binary with JSON support
+1. `/Users/m/guide/qxgo/internal/hook/response.go` - **New file** for JSON response building
+2. `/Users/m/guide/qxgo/main.go` - Modified to output JSON to stdout
+3. `/Users/m/guide/qxgo/qxgo` - Rebuilt binary with JSON support
 
 ## Deployment
 
-The updated `qxgo` binary is already in place at `/Users/m/guides/qxgo/qxgo` and working with the existing hook configuration in `~/.claude/settings.json`.
+The updated `qxgo` binary is already in place at `/Users/m/guide/qxgo/qxgo` and working with the existing hook configuration in `~/.claude/settings.json`.
 
 No configuration changes needed - the hook automatically detects and uses the new JSON output format.

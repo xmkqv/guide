@@ -15,7 +15,7 @@ Format: [Biome](configs/biome.json); Auto (requires ~/biome.json symlink mainten
 Type Check: [Pyright](configs/pyrightconfig.json); Requires symlink.
 
 ```bash
-ln -s ~/guides/configs/{name} pyrightconfig.json
+ln -s ~/guide/configs/{name} pyrightconfig.json
 ```
 
 Format & Lint: [Ruff](configs/ruff.toml); Auto.

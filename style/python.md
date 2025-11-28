@@ -113,4 +113,4 @@ Prefer einops when:
 
 ## Ruff
 
-Global config at `/Users/m/guides/configs/ruff.toml`. Root pyproject.toml extends it. No local ruff configs in libs - they inherit from root.
+Global config at `/Users/m/guide/configs/ruff.toml`. Root pyproject.toml extends it. No local ruff configs in libs - they inherit from root.

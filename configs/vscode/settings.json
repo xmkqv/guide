@@ -120,7 +120,7 @@
   "search.useIgnoreFiles": true,
   /*** LANGUAGE-SPECIFIC SETTINGS ***/
   /* markdown */
-  "markdownlint.configFile": "/Users/m/guides/configs/.markdownlint.json",
+  "markdownlint.configFile": "/Users/m/guide/configs/.markdownlint.json",
   "markdown.validate.referenceLinks.enabled": "ignore", // allow [syntax like this]
   "markdown.preview.scrollPreviewWithEditor": false, // prevents document scroll impacting the preview scroll
   "markdown.preview.scrollEditorWithPreview": false,

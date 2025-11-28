@@ -4,7 +4,7 @@
 
 # Load .env file if it exists
 load_env() {
-    local env_file="${1:-$HOME/guides/.env}"
+    local env_file="${1:-$HOME/guide/.env}"
     if [[ -f "$env_file" ]]; then
         # shellcheck disable=SC1090
         set -a

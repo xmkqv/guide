@@ -77,7 +77,7 @@ If saves are unexpectedly blocked:
 
 1. Check stderr output - linters output directly
 2. Verify linter is installed: `which biome ruff pyright markdownlint shellcheck`
-3. Check config paths in `~/guides/.env`
+3. Check config paths in `~/guide/.env`
 4. Verify configs exist at specified paths
 5. Run linter manually: `biome check file.js`
 
