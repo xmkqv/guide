@@ -3,11 +3,13 @@
 Flow: Design -> Code -> Signal
 """
 
+from __future__ import annotations
+
 from pathlib import Path
-from typing import Any
+from typing import Annotated, Any, Self
 
 import yaml
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from guide.design import Spec
 from guide.lang import Lang
@@ -15,6 +17,12 @@ from guide.loader import Loader
 from guide.logger import Logger
 from guide.signal import Test
 from guide.tester import Tester
+
+
+def gen_acronym(name: str) -> str:
+    """Generate lowercase acronym from name words."""
+    words = name.split()
+    return "".join(w[0].lower() for w in words if w)
 
 
 class Mission(BaseModel):
@@ -29,9 +37,32 @@ class Mission(BaseModel):
     logger: Logger | None = Field(default=None, exclude=True)
     tester: Tester | None = Field(default=None, exclude=True)
 
-    design: list[Spec] = Field(default_factory=list)
-    signal: list[Test] = Field(default_factory=list)
-    datasets: list[Loader[Any]] = Field(default_factory=list)
+    design: Annotated[list[Spec], Field(default_factory=list)]
+    signal: Annotated[list[Test], Field(default_factory=list)]
+    datasets: Annotated[list[Loader[Any]], Field(default_factory=list)]
+
+    @model_validator(mode="before")
+    @classmethod
+    def generate_id(cls, data: dict[str, Any]) -> dict[str, Any]:
+        """Generate id from name if not provided."""
+        if "id" not in data and "name" in data:
+            data["id"] = gen_acronym(data["name"])
+        return data
+
+    @model_validator(mode="after")
+    def configure_tester(self) -> Self:
+        """Auto-instantiate tester from lang if not provided."""
+        if self.tester is None:
+            match self.lang:
+                case Lang.Py:
+                    from guide.tester.py import Tester as PyTester
+
+                    object.__setattr__(self, "tester", PyTester())
+                case Lang.Ts:
+                    from guide.tester.ts import Tester as TsTester
+
+                    object.__setattr__(self, "tester", TsTester())
+        return self
 
     @property
     def path(self) -> Path:

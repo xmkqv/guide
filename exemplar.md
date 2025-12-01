@@ -12,9 +12,10 @@ Specs declare invariants. Tests derive from specs. Signals ground design in real
 
 Each signal is a loss measurement. Each delta is a gradient step. Iteration converges toward correctness.
 
-Anti-fragile: Flaws do not weaken. They reveal hidden assumptions. Each failure strengthens.
+- Anti-fragile: Flaws reveal hidden assumptions. Each failure strengthens.
+- Self-healing: Failures contain remediation signals. No external oracle required.
 
-## mission.yaml
+## Mission Structure
 
 ```yaml
 id: kv
@@ -45,25 +46,21 @@ design:
       invariant: crash → restart → state = replay(log)
       constraint: no acknowledged write lost
 
-signal:
-  - id: T1
-    ref: S1
-    args: {ops: 1000}
-    data: null
-
-  - id: T2
-    ref: S2
-    args: {crash_after: 500}
-    data: null
+signal: []  # populated by tester
 ```
 
-## Derivation
+## Test Derivation
 
-Specs generate tests. The invariant `write(k,v) → log.append(k,v) → ack` derives:
+Tests declare spec linkage via docstring: `@design(S0, S1, ...)`
+
+The invariant `write(k,v) → log.append(k,v) → ack` derives:
 
 ```python
-def test_t1_wal_ordering():
-    """S1: ack implies persisted"""
+def test_wal_ordering():
+    """Verify write-ahead log preserves order.
+
+    @design(S1)
+    """
     store = KVStore()
     ops = []
     for i in range(1000):
@@ -72,14 +69,17 @@ def test_t1_wal_ordering():
         ops.append((k, v))
 
     log_entries = store.read_log()
-    assert ops == log_entries  # order preserved, all present
+    assert ops == log_entries
 ```
 
 The invariant `crash → restart → state = replay(log)` derives:
 
 ```python
-def test_t2_crash_recovery():
-    """S2: no acknowledged write lost"""
+def test_crash_recovery():
+    """Verify no acknowledged write lost after crash.
+
+    @design(S2)
+    """
     store = KVStore()
     for i in range(500):
         store.write(f"k{i}", f"v{i}")
@@ -91,7 +91,9 @@ def test_t2_crash_recovery():
         assert store.read(f"k{i}") == f"v{i}"
 ```
 
-## Iteration 0: Initial Implementation
+Tests without `@design(...)` are excluded from signal by default.
+
+## Iteration 0: Initial
 
 ```python
 import attrs
@@ -112,38 +114,46 @@ class KVStore:
         return list(self._log)
 
     def simulate_crash(self):
-        self._data.clear()  # memory lost
+        self._data.clear()
 
     def recover(self):
         for k, v in self._log:
             self._data[k] = v
 ```
 
-Signal:
+After `pytest --report-log=results/results.jsonl` and sync:
 
 ```yaml
 signal:
-  - id: T1
-    ref: S1
-    data: {status: pass}
+  - id: T0
+    ref: tests/test_kv.py::test_wal_ordering
+    spec_ids: [S1]
+    result:
+      outcome: passed
+      duration: 0.042
+      timestamp: 2025-12-01T10:00:00Z
 
-  - id: T2
-    ref: S2
-    data: {status: fail, reason: "log in memory, lost on crash"}
+  - id: T1
+    ref: tests/test_kv.py::test_crash_recovery
+    spec_ids: [S2]
+    result:
+      outcome: failed
+      duration: 0.018
+      timestamp: 2025-12-01T10:00:00Z
 ```
 
 ## Iteration 1: Gradient Step
 
-T2 failure reveals: log must persist to disk, not memory.
+T1 failure reveals: log in memory, lost on crash.
 
-∆Design:
+∆Design - refine S1:
 
 ```yaml
 - id: S1
   name: Write-Ahead Log
   aspect_id: S0
   detail:
-    invariant: write(k,v) → disk.append(k,v) → ack  # memory → disk
+    invariant: write(k,v) → disk.append(k,v) → ack
     constraint: ack implies durable
 ```
 
@@ -154,46 +164,62 @@ def write(self, k, v):
     with open(self._log_path, "a") as f:
         f.write(f"{k}\t{v}\n")
         f.flush()
-        os.fsync(f.fileno())  # force to disk
+        os.fsync(f.fileno())
     self._data[k] = v
 ```
 
 ∆Signal:
 
 ```yaml
-- id: T2
-  ref: S2
-  data: {status: pass}
+- id: T1
+  ref: tests/test_kv.py::test_crash_recovery
+  spec_ids: [S2]
+  result:
+    outcome: passed
+    duration: 0.156
+    timestamp: 2025-12-01T11:00:00Z
 ```
 
-Loss decreased. But new signal emerges.
+Loss decreased.
 
 ## Iteration 2: Stress Reveals
 
-Add stress test (anti-fragility probe):
+Add stress test:
 
-```yaml
-- id: T3
-  ref: S1
-  args: {ops: 100000, concurrent: 8}
-  data: null
+```python
+def test_throughput():
+    """Verify write throughput under load.
+
+    @design(S1)
+    """
+    store = KVStore()
+    start = time.perf_counter()
+    for i in range(100_000):
+        store.write(f"k{i}", f"v{i}")
+    elapsed = time.perf_counter() - start
+    ops_per_sec = 100_000 / elapsed
+    assert ops_per_sec > 10_000, f"Too slow: {ops_per_sec:.0f} ops/sec"
 ```
 
 Signal:
 
 ```yaml
-- id: T3
-  ref: S1
-  data: {status: fail, reason: "fsync per write: 12 ops/sec"}
+- id: T2
+  ref: tests/test_kv.py::test_throughput
+  spec_ids: [S1]
+  result:
+    outcome: failed
+    duration: 8.333
+    timestamp: 2025-12-01T12:00:00Z
 ```
 
-Flaw revealed: fsync per write is correct but slow.
+Flaw: fsync per write yields 12 ops/sec.
 
 ## Iteration 3: Insight
 
-The flaw reveals a hidden assumption: durability requires immediate fsync. But the spec says `ack implies persisted` - it does not say `persisted immediately`.
+The flaw reveals hidden assumption: durability requires immediate fsync. The spec says `ack implies persisted` - not `persisted immediately`.
 
-∆Design: Add batching directive under S1.
+∆Design - add batching directive:
 
 ```yaml
 - id: S3
@@ -215,15 +241,30 @@ def write(self, k, v):
     self._data[k] = v
 ```
 
+Update test to verify both specs:
+
+```python
+def test_throughput():
+    """Verify write throughput under load.
+
+    @design(S1, S3)
+    """
+    # ...
+```
+
 ∆Signal:
 
 ```yaml
-- id: T3
-  ref: S1
-  data: {status: pass, throughput: "45000 ops/sec"}
+- id: T2
+  ref: tests/test_kv.py::test_throughput
+  spec_ids: [S1, S3]
+  result:
+    outcome: passed
+    duration: 2.222
+    timestamp: 2025-12-01T13:00:00Z
 ```
 
-The system is now stronger than before the flaw was discovered.
+System is stronger than before stress.
 
 ## Final State
 
@@ -263,18 +304,41 @@ design:
       tradeoff: durability window = batch interval
 
 signal:
+  - id: T0
+    ref: tests/test_kv.py::test_wal_ordering
+    spec_ids: [S1]
+    result:
+      outcome: passed
+      duration: 0.042
+      timestamp: 2025-12-01T13:00:00Z
+
   - id: T1
-    ref: S1
-    data: {status: pass}
+    ref: tests/test_kv.py::test_crash_recovery
+    spec_ids: [S2]
+    result:
+      outcome: passed
+      duration: 0.089
+      timestamp: 2025-12-01T13:00:00Z
 
   - id: T2
-    ref: S2
-    data: {status: pass}
-
-  - id: T3
-    ref: S1
-    data: {status: pass, throughput: "45000 ops/sec"}
+    ref: tests/test_kv.py::test_throughput
+    spec_ids: [S1, S3]
+    result:
+      outcome: passed
+      duration: 2.222
+      timestamp: 2025-12-01T13:00:00Z
 ```
+
+## Spec Hierarchy
+
+```text
+S0 Durability (idea)
+├── S1 Write-Ahead Log (directive)
+│   └── S3 Batch Commit (directive)
+└── S2 Recovery (directive)
+```
+
+Ideas ground in tenets. Directives decompose into testable invariants. The tree grows as understanding deepens.
 
 ## Properties
 
@@ -291,17 +355,6 @@ Anti-fragile:
 - Iteration 3: Stronger than before stress
 
 Self-healing:
-- No external oracle decides fixes
-- Failures contain their own remediation signal
+- Failures contain remediation signals
 - System evolves toward robustness
-
-## Spec Hierarchy
-
-```text
-S0 Durability (idea)
-├── S1 Write-Ahead Log (directive)
-│   └── S3 Batch Commit (directive)
-└── S2 Recovery (directive)
-```
-
-Ideas ground in tenets. Directives decompose into testable invariants. The tree grows as understanding deepens.
+- No external oracle decides fixes

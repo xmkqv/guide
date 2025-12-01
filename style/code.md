@@ -1,346 +1,139 @@
-# Code Style Guide
+# Code
 
 Principles for reasoning about software. Adapt to context. Apply with judgment.
 
-## Preamble
+## Foundations
 
-This guide provides heuristics for architectural decision-making, not templates for mechanical application. Every principle admits exceptions when problem structure demands. Rigid adherence to patterns causes as much damage as their absence.
+Clean Code (Martin). Pragmatic Programmer (Hunt/Thomas). A Philosophy of Software Design (Ousterhout). Domain-Driven Design (Evans). Functional Core, Imperative Shell (Bernhardt).
 
-Skilled practitioners recognize the difference between a pattern that fits and a pattern imposed. Structure should emerge from a problem's natural joints—not from conformance to an external template.
+## Orientation
 
-Diagnostic: If satisfying architectural constraints requires more code than solving the actual problem, reconsider the architecture.
+Complexity is the adversary. Structure emerges from problem shape, not template conformance.
+
+Diagnostic: If satisfying architectural constraints requires more code than solving the problem, reconsider the architecture.
 
 ## Properties
 
-Three properties characterize well-structured code. They exist in tension; maximizing one may compromise another. Navigate tradeoffs deliberately.
+Three properties characterize well-structured code. They exist in tension.
 
-| Property | Manifestation | Diagnostic Question |
-| -------- | ------------- | ------------------- |
-| Referential Transparency | Expressions substitutable for their values | Can this be inlined or extracted without behavioral change? |
-| Information Locality | Related concerns colocated; unrelated concerns separated | Does understanding require traversing distant modules? |
-| Representation Fidelity | Types encode domain invariants | Can invalid states be constructed? |
+| Property | Meaning | Diagnostic |
+| -------- | ------- | ---------- |
+| Referential transparency | Expressions substitutable for their values | Can this be inlined/extracted without behavioral change? |
+| Information locality | Related concerns colocated | Does understanding require traversing distant modules? |
+| Representation fidelity | Types encode domain invariants | Can invalid states be constructed? |
 
 ## Complexity
 
-Complexity is the primary adversary. It accumulates through accretion and metastasizes through coupling.
-
-### Manifestations
-
+Manifestations:
 - Change amplification: modifications require coordinated edits across locations
 - Cognitive load: understanding demands excessive held context
-- Hidden coupling: modifications trigger failures in apparently unrelated components
+- Hidden coupling: changes trigger failures in apparently unrelated components
 
-### Mitigation
+Mitigation:
+- Elimination: simplify, remove unnecessary abstraction, delete code that doesn't earn its keep
+- Encapsulation: hide irreducible complexity behind stable interfaces simpler than what they conceal
 
-Two complementary strategies:
+Module depth (Ousterhout): ratio of functionality to interface complexity. Prefer depth.
 
-Elimination: Reduce intrinsic complexity. Simplify. Remove unnecessary abstraction. Consolidate scattered logic. Delete code that no longer earns its keep.
+## Purity
 
-Encapsulation: Hide irreducible complexity behind stable interfaces. The interface should be simpler than the implementation it conceals.
+Same inputs produce same outputs, no observable effects. Compose without coordination, test without mocking.
 
-```text
--- Shallow (complexity exposed through interface)
-function Process(data, mode, flags, opts, overrides, ctx) -> Result
+Default to pure. Relax at system edges, in infrastructure concerns, and where profiling demonstrates necessity.
 
--- Deep (complexity absorbed by implementation)
-function Process(request: Request) -> Result
-```
-
-Module depth is the ratio of functionality provided to interface complexity. Prefer depth. Configuration parameters and excessive options push complexity onto callers—consider absorbing reasonable defaults.
+Local mutation invisible to callers preserves referential transparency.
 
 ## Architecture
 
-No single architectural pattern suits all problems. Patterns are tools with applicability conditions, not universal templates.
+No single pattern suits all problems. Patterns have applicability conditions.
 
-### Pattern Applicability
+| Pattern | When Effective | When Not |
+| ------- | -------------- | -------- |
+| Functional core / Imperative shell | Logic separates cleanly from effects | Logic and effects inherently interleaved |
+| Ports and adapters | Dependencies vary or require test substitution | Single stable implementation |
+| Vertical slices | Features deploy independently | Features share significant logic |
+| Layered | Straightforward request-response | Domain doesn't align with layers |
 
-Functional Core / Imperative Shell
-- Effective when business logic separates cleanly from effects
-- Core computes decisions; shell executes them
-- Less effective when logic and effects are inherently interleaved
+Anti-patterns:
+- Structural cargo culting: imposing architecture on problems that don't need it
+- Premature abstraction: generalizing before the second concrete case
+- Indirection without purpose: layers that provide no concrete value
 
-Ports and Adapters
-- Appropriate when external dependencies vary across environments or require substitution for testing
-- Overhead unjustified for stable, single-implementation dependencies
+## Boundaries
 
-Vertical Slices
-- Suitable when features deploy independently with minimal shared infrastructure
-- Introduces duplication when features share significant logic
+Parse, don't validate (King). Transform unstructured input into typed domain values at trust transitions.
 
-Layered
-- Acceptable for straightforward request-response flows with minimal domain complexity
-- Degrades when domain logic doesn't align with layer boundaries
-
-### Anti-Patterns
-
-Structural Cargo Culting
-- Imposing hexagonal architecture on a utility script
-- Decomposing a cohesive 50-line module into five files to satisfy a template
-- Creating Ports and Adapters when a single implementation exists and will never change
-
-Premature Abstraction
-- Extracting a "reusable" component from a single use site
-- Generalizing before the second concrete case exists
-- Building extension points for requirements that may never materialize
-
-Indirection Without Purpose
-- Every layer, interface, and abstraction has a cost
-- Indirection is justified only when it provides concrete value: substitutability, testability, or isolation of change
-- Indirection for its own sake is complexity
-
-## Style
-
-### Purity
-
-Pure functions—same inputs produce same outputs, no observable effects—compose without coordination and test without mocking.
-
-```text
-function Compress.Range(samples, chirp) -> CompressedSamples:
-    windowed = Apply.Window(samples)
-    spectrum = Fft(windowed)
-    return Correlate(spectrum, chirp)
-```
-
-When to apply: Core domain logic, transformations, computations, anything that benefits from referential transparency.
-
-When to relax:
-- Adapter code at system edges
-- Infrastructure concerns (logging, metrics, configuration)
-- Performance-critical paths where profiling demonstrates mutation provides measurable benefit
-- Interop with libraries that assume mutable interfaces
-
-Randomness and time are implicit dependencies. Make them explicit when determinism matters for testing or reproducibility.
-
-Local mutation invisible to callers preserves referential transparency. A function that internally uses mutable buffers but exposes a pure interface remains pure.
-
-### Semantics
-
-Names compress meaning. Types prevent misuse.
-
-```text
--- Low semantic density
-function Process(id: String, data: Dict, flag: Bool) -> Dict
-
--- High semantic density
-function Settle.Trade(id: TradeId, terms: SettlementTerms) -> Settlement
-```
-
-Type distinctions: Use distinct types to prevent confusion where confusion causes harm. `AccountId` vs `UserId` prevents transposition errors that `String` vs `String` permits. Apply proportionally—not every string requires a newtype.
-
-Naming patterns (adapt separator to language idiom):
-
-| Element | Pattern | Rationale |
-| ------- | ------- | --------- |
-| Function | `Verb.Noun` | Action and target explicit |
-| Type | `ContextNoun` | Domain concept with scope |
-| Constant | `SEMANTIC_NAME` | Meaning over value |
-
-When naming is difficult, the abstraction is likely wrong.
-
-### Composition
-
-Granularity is a judgment call. Neither "many tiny functions" nor "few large functions" is universally correct.
-
-Heuristics for decomposition:
-- Extract when a block has a name that clarifies intent
-- Extract when the same logic appears in multiple locations (after the second occurrence)
-- Extract when testing a subset in isolation provides value
-
-Heuristics against decomposition:
-- Logic is only used once and inline reading is clearer
-- Extraction requires passing many parameters or introduces awkward signatures
-- The "abstraction" merely moves code without adding understanding
-
-Streaming and lazy evaluation reduce memory pressure when processing sequences. Apply when data volume warrants; unnecessary for small collections.
-
-## Design
-
-### Boundaries
-
-Boundaries occur where trust transitions. Parse at boundaries; trust typed internals thereafter.
-
-```text
-Untrusted → [Parse] → Domain Values → [Logic] → [Effect] → External
-```
-
-Boundary locations:
+Trust transitions occur at:
 - System edges: user input, network, filesystem, external APIs
 - Subsystem interfaces: between teams, services, bounded contexts
 
-Not boundaries: Internal function calls between trusted components operating on validated domain types within the same trust domain. Redundant validation here is noise. However, treat team or security boundaries as trust transitions even within a single process.
+Not trust transitions: internal calls between components operating on validated types in the same trust domain.
 
-Parse, don't validate: transform unstructured input into typed domain values. The type system then enforces invariants—re-checking is unnecessary and obscures where trust is actually established.
+Smart constructors: hide type constructors, expose only parsing functions. All instances valid by construction.
 
-Smart constructors: Hide type constructors. Expose only parsing functions.
+## Semantics
 
-```text
-module Email:
-    type Email (private)
-    function parse(raw: String) -> Result[Email, ParseError]
-```
+Names compress meaning. Types prevent misuse.
 
-All instances valid by construction. No runtime validation needed thereafter.
+| Element | Pattern | Rationale |
+| ------- | ------- | --------- |
+| Function | verb_noun | Action and target explicit |
+| Type | ContextNoun | Domain concept with scope |
+| Constant | SEMANTIC_NAME | Meaning over value |
 
-### Resources
+When naming is difficult, the abstraction is likely wrong.
 
-Explicit lifecycle management when resources are scarce or expensive.
+Distinct types prevent confusion where confusion causes harm. Apply proportionally.
 
-When to apply: Database connections, file handles, memory buffers in tight loops, operations with hard deadlines.
+## Totality
 
-When unnecessary: Short-lived computations with abundant resources, garbage-collected environments where resource pressure is absent.
+Handle all representable inputs. Partial functions propagate failure modes silently.
 
-```text
-function Process.Batch(items, deadline: Timestamp) -> Result[Batch, Error]:
-    results = []
-    for item in items:
-        if Now() > deadline:
-            return Ok(PartialBatch(results, reason="deadline"))
-        results.append(Process(item))
-    return Ok(Batch(results))
-```
+Options:
+- Refined input types: `first(xs: NonEmpty[A]) -> A`
+- Refined output types: `first(xs: List[A]) -> Option[A]`
+- Result types for expected failures: `parse(s) -> Result[T, ParseError]`
 
-### Observability
+Exhaustive pattern matching. Use assert_never for inexhaustive matches.
 
-Structured telemetry enables diagnosis. Emit events with operation identifiers; trace causality across calls.
+## Composition
 
-When essential: Production services, distributed systems, long-running operations, anything where post-hoc diagnosis is required.
+Decomposition heuristics:
+- Extract when a name clarifies intent
+- Extract when logic appears in multiple locations (after second occurrence)
+- Extract when testing a subset provides value
 
-When optional: Local scripts, exploratory code, tests (which have their own assertions).
+Against decomposition:
+- Logic used once, inline reading clearer
+- Extraction requires passing many parameters
+- The "abstraction" merely moves code without adding understanding
 
-```text
-function Execute(op: Operation, trace: TraceContext) -> Result:
-    Emit(Started(trace.id, op.id, Now()))
-    result = Perform(op)
-    Emit(Completed(trace.id, result.status, Elapsed()))
-    return result
-```
+## Observability
 
-Errors should carry sufficient context for diagnosis without access to the original environment.
+Structured telemetry for production systems. Emit events with operation identifiers; trace causality.
 
-### Resilience
+Errors carry sufficient context for diagnosis without access to the original environment.
 
-Graceful degradation when full success is impossible.
+## Testing
 
-```text
-type Result:
-    output: Output
-    quality: Full | Degraded | Partial
-    warnings: List[Warning]
-```
+| Component | Approach |
+| --------- | -------- |
+| Pure functions | Unit tests, property tests |
+| Effectful code | Integration tests |
+| Boundaries | Contract tests |
 
-When to apply: User-facing services, batch processing where partial results have value, systems where availability trumps consistency.
+Property tests when algebraic properties exist: round-trip, associativity, invariant preservation.
 
-When inappropriate: Safety-critical systems where partial results are dangerous, transactions requiring atomicity.
-
-### Concurrency
-
-Prefer message-passing over shared mutable state. Immutable data crosses thread boundaries without synchronization.
-
-When shared state is unavoidable:
-- Encapsulate synchronization within a module
-- Expose a pure interface to callers
-- Prefer structured concurrency (task groups, scopes) over unstructured spawning
-
-Concurrency correctness follows from the same principles: information hiding, explicit dependencies, total functions.
-
-## Checks
-
-### Totality
-
-Handle all representable inputs. Partial functions—those undefined for some inputs—propagate failure modes silently.
-
-Refined input types eliminate partiality at the source:
-
-```text
--- Partial
-function first(xs: List[A]) -> A
-
--- Total via refined input
-function first(xs: NonEmpty[A]) -> A
-
--- Total via refined output
-function first(xs: List[A]) -> Option[A]
-```
-
-Prefer refined inputs when callers can guarantee the constraint. Prefer refined outputs when the constraint is situational.
-
-Result types model expected failure as values:
-
-```text
-function Parse.Config(text) -> Result[Config, ConfigError]:
-    if Missing.Field(text, "required"):
-        return Error(ConfigError.MissingField("required"))
-    return Ok(Config(...))
-```
-
-When to use Result: Failure is a normal outcome. Callers must handle the failure case. The error carries domain-relevant information.
-
-When to let exceptions propagate: Failure indicates a bug. Recovery is impossible or meaningless. The call site cannot usefully handle the error.
-
-Exhaustive pattern matching ensures all cases are handled. Avoid catch-all branches that silently swallow unexpected variants.
-
-Use assert_never (or equivalent) to make inexhaustive matches a type error:
-
-```text
-match status:
-    case Pending(): handle_pending()
-    case Active(): handle_active()
-    case _: assert_never(status)  -- type error if cases missing
-```
-
-### Effects
-
-Effect types distinguish computational contexts.
-
-| Type | Meaning | Use When |
-| ---- | ------- | -------- |
-| Result[A, E] | May fail with E | Parsing, validation, fallible operations |
-| Option[A] | May be absent | Lookup, search, nullable replacement |
-| List[A] | Multiple results | Non-determinism, queries |
-| IO[A] | External effects | Files, network, time, randomness |
-
-Result and Option are values (pure). IO describes effects (impure when executed).
-
-### Testing
-
-Testing strategy follows from code structure, not vice versa.
-
-| Component | Approach | Rationale |
-| --------- | -------- | --------- |
-| Pure functions | Unit tests, property tests | Deterministic, fast, high coverage achievable |
-| Effectful code | Integration tests | Verify coordination and external interaction |
-| Boundaries | Contract tests | Validate parsing, serialization, protocol compliance |
-
-Property tests are valuable when algebraic properties exist: round-trip (encode/decode), associativity, commutativity, invariant preservation. Not every function has meaningful properties—example-based tests suffice when properties are absent or contrived.
-
-```text
-property "serialize then parse is identity":
-    for all x in Valid.Inputs():
-        assert Parse(Serialize(x)) == x
-```
-
-## Heuristics
-
-When principles conflict, these defaults often apply. Context overrides.
+## Tensions
 
 | Tension | Default | Override When |
 | ------- | ------- | ------------- |
-| Abstraction vs Concreteness | Delay abstraction until second use | Pattern is well-established and stable |
-| DRY vs Locality | Tolerate duplication over wrong abstraction | Duplication causes actual maintenance burden |
-| Depth vs Breadth | Deeper modules with simpler interfaces | Interface complexity is inherent to domain |
-| Purity vs Pragmatism | Pure where feasible | Performance or interop requires mutation |
-| Explicit vs Implicit | Explicit dependencies and effects | Boilerplate overwhelms signal |
+| Abstraction vs Concreteness | Delay abstraction until second use | Pattern is well-established |
+| DRY vs Locality | Tolerate duplication | Duplication causes maintenance burden |
+| Depth vs Breadth | Deeper modules | Interface complexity is inherent |
+| Purity vs Pragmatism | Pure where feasible | Profiling shows necessity |
+| Explicit vs Implicit | Explicit dependencies | Boilerplate overwhelms signal |
 
-Universal defaults: Measure before optimizing. Delete before commenting. Simplify before generalizing.
+## Defaults
 
-## Application
-
-This guide informs decision-making. It does not substitute for it.
-
-Before applying any pattern:
-1. Identify the problem's actual constraints and forces
-2. Evaluate whether the pattern addresses those forces
-3. Consider the pattern's cost against its benefit in this context
-4. Select the simplest approach that adequately addresses the problem
-
-The best code often uses no named pattern at all. It simply solves the problem with clarity.
+Measure before optimizing. Delete before commenting. Simplify before generalizing.

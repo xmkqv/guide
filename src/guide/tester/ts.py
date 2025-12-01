@@ -7,8 +7,8 @@ from typing import TYPE_CHECKING, Literal
 
 from pydantic import BaseModel, ConfigDict
 
+from guide import signal
 from guide.lang import Lang
-from guide.signal import Test
 
 if TYPE_CHECKING:
     from guide.mission import Mission
@@ -20,7 +20,7 @@ class Tester(BaseModel):
     lang: Literal[Lang.Ts] = Lang.Ts
     results_path_stem: str = "results/results.json"
 
-    def get_signal(self, mission: "Mission") -> list[Test]:
+    def get_signal(self, mission: "Mission") -> list[signal.Test]:
         results_path = mission.dir / self.results_path_stem
         if not results_path.exists():
             raise FileNotFoundError(f"Results file not found: {results_path}")

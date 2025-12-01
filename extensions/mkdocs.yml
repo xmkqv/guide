@@ -1,0 +1,7 @@
+site_name: FletNodeflow
+
+theme:
+  name: "material"
+
+plugins:
+  - mkdocstrings

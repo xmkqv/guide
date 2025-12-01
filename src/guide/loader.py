@@ -4,7 +4,7 @@ from typing import Protocol, Self, cast, runtime_checkable
 import numpy as np
 from pydantic import BaseModel, ConfigDict, PrivateAttr
 
-from guide.utils import get_func, get_rng
+from guide import utils
 
 
 @runtime_checkable
@@ -26,12 +26,12 @@ class Loader[T: DataType](BaseModel):
     def data(self, force_reload: bool = False) -> T:
         if self._data and not force_reload:
             return self._data
-        loader = get_func(self.ref)
+        loader = utils.get_func(self.ref)
         data = loader(self.target)
         return cast("T", data)
 
     def data_split(self, /, test_fraction: float) -> tuple[T, T]:
-        rng = get_rng()
+        rng = utils.get_rng()
         data = self.data()
         indices = np.arange(len(data))
         indices_shuffled = rng.permutation(indices)

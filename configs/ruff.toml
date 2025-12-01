@@ -9,6 +9,7 @@ cache-dir = ".cache/ruff"
 
 [lint]
 select = [
+    "FA",       # flake8-future-annotations
     "F",        # Pyflakes
     "E",        # pycodestyle errors
     "W",        # pycodestyle warnings

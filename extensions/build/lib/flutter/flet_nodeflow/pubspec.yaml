@@ -1,0 +1,24 @@
+name: flet_nodeflow
+description: Flet FletNodeflow control
+repository: https://github.com/MyGithubAccount/flet-nodeflow/src/flutter/flet_nodeflow
+version: 0.1.0
+homepage: https://github.com/MyGithubAccount/flet-nodeflow
+
+environment:
+  sdk: '>=3.8.0 <4.0.0'
+  flutter: ">=3.32.0"
+
+dependencies:
+  flet:
+    git:
+      url: https://github.com/flet-dev/flet.git
+      path: packages/flet
+  flutter:
+    sdk: flutter
+  vyuh_node_flow: ^0.2.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+  

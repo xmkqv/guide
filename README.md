@@ -1,10 +1,6 @@
 
 Declarative anti-fragile self-healing reifier.
 
-[Complete Exemplar](./exemplar.md)
-
-- Usage: `guide` launch guide app, aliased in ~/.zshrc.
-
 # Mission
 
 ```sql
@@ -17,7 +13,7 @@ mission (
 )
 ```
 
-- mission.yaml; Intended to be consumed by an agent to quickly understand the mission & state.
+- mission.yaml
 
 ```yaml
 id: {string}
@@ -25,7 +21,7 @@ name: {string}
 lang: {lang}
 design: {list[spec]}
 signal: {list[test]}
-datasets: {list[dataset]}
+datasets?: {list[loader]}
 ```
 
 - Self-healing: Deltas behave as stochastic gradient updates.
@@ -53,34 +49,43 @@ Implementation intended to satisfy Specs.
 
 ## Signal
 
-App syncs test suites to Signal. Semantically, heuristically, and non-invasively link test results to Specs. Formal connections are out of scope.
+Lang determines the Tester, which parses programmatic tests and their results.
+
+```text
+1. tests = get_tests()
+2. for test in tests:
+    a. signal_test = to_signal_test(test)
+    b. add to signal if has spec_ids
+```
 
 ```sql
 test(
     id text /T\d+/ pk,
-    ref? text,
-    args jsonb,
-    data jsonb,
+    ref? text, -- qualified path to programmatic test
+    spec_ids (text /S\d+/)[], -- verified spec references
+    result jsonb -- framework structured test result
 )
 ```
+
+- Inline Design Spec Ids Pattern: `@design(/S\d+/,...)`
 
 ## Datasets
 
-Optional dataset manifest & protocol.
+Optional dataset manifest.
 
 ```sql
-dataset(
-    name text,
-    loader_ref? text
+loader(
+    ref text,
+    target text
 )
 ```
 
-```python
-from guide import Mission
+# Usage
 
-mission = Mission.load_nearest()
-registry = mission.get_registry()
-
-loader = registry.get_loader("dataset_name")
-train, test = loader.load_split(test_fraction=0.2, seed=42)
+```bash
+# Launch
+guide
 ```
+
+- [Exemplar](./exemplar.md)
+
