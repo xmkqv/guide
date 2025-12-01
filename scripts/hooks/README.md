@@ -94,7 +94,7 @@ Shared utilities for hooks.
 
 ### Functions
 
-- `load_env()` - Loads ~/guides/.env automatically when sourced
+- `load_env()` - Loads ~/guide/.env automatically when sourced
 - `require_command(cmd)` - Checks if command exists, exits 2 if missing
 - `check_markdown_bold(path, content)` - Validates no bold text in markdown
 - `format_error(title, message)` - Formats error messages with borders

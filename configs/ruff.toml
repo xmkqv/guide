@@ -43,6 +43,8 @@ ignore = [
     "ISC001",   # single-line-implicit-concatenation (formatter conflict)
     "E501",     # line-too-long
     "C408",     # disallows dict(...)
+    "TC001",    # allow non-module level imports
+    "TC003",    # Type checking imports not required for type imports only
 ]
 
 [format]

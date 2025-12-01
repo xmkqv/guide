@@ -1,347 +1,346 @@
 # Code Style Guide
 
-All examples use pseudocode. Adapt naming conventions and syntax to your language idiom.
+Principles for reasoning about software. Adapt to context. Apply with judgment.
 
-## Fundamentals
+## Preamble
 
-Nine principles governing correctness, maintainability, and reliability.
+This guide provides heuristics for architectural decision-making, not templates for mechanical application. Every principle admits exceptions when problem structure demands. Rigid adherence to patterns causes as much damage as their absence.
 
-| Pillar | Fundamental | Governs | Principle | Constraint |
-| ------ | ----------- | ------- | --------- | ---------- |
-| Style | Purity | Effects, state, randomness | Pure core, effectful shell, explicit RNG | No hidden mutation, no implicit randomness |
-| Style | Semantics | Meaning, naming | Domain language, typed values, named constants | No primitives for domain concepts, no magic |
-| Style | Composition | Granularity | Single concern, streaming pipelines | No memory-heavy materialization |
-| Design | Boundaries | Validation | Parse at entry, trust typed internals | No redundant validation, no naive trust |
-| Design | Budgets | Memory, time | Budget tracking, deadline propagation | No unbounded allocation or execution |
-| Design | Observability | Telemetry | Structured events, operation IDs, causality | No silent failures, no unobservable states |
-| Design | Degradation | Partial success | Fallback strategies, best-effort results | No all-or-nothing outcomes |
-| Checks | Totality | Errors, numerics | Result types, exhaustive matching, stability checks | No partial functions, no silent NaN |
+Skilled practitioners recognize the difference between a pattern that fits and a pattern imposed. Structure should emerge from a problem's natural joints—not from conformance to an external template.
+
+Diagnostic: If satisfying architectural constraints requires more code than solving the actual problem, reconsider the architecture.
+
+## Properties
+
+Three properties characterize well-structured code. They exist in tension; maximizing one may compromise another. Navigate tradeoffs deliberately.
+
+| Property | Manifestation | Diagnostic Question |
+| -------- | ------------- | ------------------- |
+| Referential Transparency | Expressions substitutable for their values | Can this be inlined or extracted without behavioral change? |
+| Information Locality | Related concerns colocated; unrelated concerns separated | Does understanding require traversing distant modules? |
+| Representation Fidelity | Types encode domain invariants | Can invalid states be constructed? |
+
+## Complexity
+
+Complexity is the primary adversary. It accumulates through accretion and metastasizes through coupling.
+
+### Manifestations
+
+- Change amplification: modifications require coordinated edits across locations
+- Cognitive load: understanding demands excessive held context
+- Hidden coupling: modifications trigger failures in apparently unrelated components
+
+### Mitigation
+
+Two complementary strategies:
+
+Elimination: Reduce intrinsic complexity. Simplify. Remove unnecessary abstraction. Consolidate scattered logic. Delete code that no longer earns its keep.
+
+Encapsulation: Hide irreducible complexity behind stable interfaces. The interface should be simpler than the implementation it conceals.
+
+```text
+-- Shallow (complexity exposed through interface)
+function Process(data, mode, flags, opts, overrides, ctx) -> Result
+
+-- Deep (complexity absorbed by implementation)
+function Process(request: Request) -> Result
+```
+
+Module depth is the ratio of functionality provided to interface complexity. Prefer depth. Configuration parameters and excessive options push complexity onto callers—consider absorbing reasonable defaults.
 
 ## Architecture
 
-Hexagonal (Ports and Adapters) with functional core. IO at edges only.
+No single architectural pattern suits all problems. Patterns are tools with applicability conditions, not universal templates.
 
-```text
-Package/
-  Subdomain/       -- vertical slice by domain concept
-    Concept        -- module = cohesive unit of behavior
-  Model            -- domain types at root
-  Error            -- error types at root
-  Value            -- type aliases, newtypes at root
-  Const            -- package constants at root
-  Ports/           -- interface definitions (input and output)
-  Adapters/        -- interface implementations
-  Infra/           -- cross-cutting (config, metrics, telemetry)
-```
+### Pattern Applicability
 
-Dependency direction: Adapters → Ports → Core. Never reverse. Inject at composition root.
+Functional Core / Imperative Shell
+- Effective when business logic separates cleanly from effects
+- Core computes decisions; shell executes them
+- Less effective when logic and effects are inherently interleaved
 
-Rules:
-- No cycles: dependency graph forms DAG
-- No service locators: no global registries, no implicit resolution
-- Stable dependencies: core imports only stable, pinned dependencies
+Ports and Adapters
+- Appropriate when external dependencies vary across environments or require substitution for testing
+- Overhead unjustified for stable, single-implementation dependencies
 
-Package by Feature, not Package by Layer. Structure reveals domain, not framework.
+Vertical Slices
+- Suitable when features deploy independently with minimal shared infrastructure
+- Introduces duplication when features share significant logic
+
+Layered
+- Acceptable for straightforward request-response flows with minimal domain complexity
+- Degrades when domain logic doesn't align with layer boundaries
+
+### Anti-Patterns
+
+Structural Cargo Culting
+- Imposing hexagonal architecture on a utility script
+- Decomposing a cohesive 50-line module into five files to satisfy a template
+- Creating Ports and Adapters when a single implementation exists and will never change
+
+Premature Abstraction
+- Extracting a "reusable" component from a single use site
+- Generalizing before the second concrete case exists
+- Building extension points for requirements that may never materialize
+
+Indirection Without Purpose
+- Every layer, interface, and abstraction has a cost
+- Indirection is justified only when it provides concrete value: substitutability, testability, or isolation of change
+- Indirection for its own sake is complexity
 
 ## Style
 
 ### Purity
 
-Pure functions: same inputs produce same outputs, no observable side effects.
+Pure functions—same inputs produce same outputs, no observable effects—compose without coordination and test without mocking.
 
 ```text
 function Compress.Range(samples, chirp) -> CompressedSamples:
     windowed = Apply.Window(samples)
     spectrum = Fft(windowed)
     return Correlate(spectrum, chirp)
-
-function Process.Burst(path) -> Result[Product, Error]:
-    samples = Read.File(path)               -- IO at boundary
-    compressed = Compress.Range(samples, chirp)  -- pure
-    return Write.Output(compressed)         -- IO at boundary
 ```
 
-Randomness: inject RNG explicitly, never use global random state.
+When to apply: Core domain logic, transformations, computations, anything that benefits from referential transparency.
 
-```text
-function Add.Noise(signal, snr, rng: RNG) -> Signal:
-    noise = rng.Normal(0, 1, signal.shape)
-    return signal + noise * (Signal.Power(signal) / snr)
-```
+When to relax:
+- Adapter code at system edges
+- Infrastructure concerns (logging, metrics, configuration)
+- Performance-critical paths where profiling demonstrates mutation provides measurable benefit
+- Interop with libraries that assume mutable interfaces
 
-Domain types: frozen/immutable by default. Mutation only in adapters.
+Randomness and time are implicit dependencies. Make them explicit when determinism matters for testing or reproducibility.
 
-Principles:
-- Effect visibility: return type reveals effect (Result, Option, Generator)
-- No hidden IO: logging, metrics, telemetry injected, not imported
-- Copy-on-modify: return new instances, do not mutate arguments
+Local mutation invisible to callers preserves referential transparency. A function that internally uses mutable buffers but exposes a pure interface remains pure.
 
 ### Semantics
 
-Names carry meaning. Types encode domain concepts.
-
-Naming patterns (`.` = word boundary, adapt to language idiom):
-
-| Element | Pattern | Example |
-| ------- | ------- | ------- |
-| Subdomain | `DomainNoun/` | `Sar/`, `Geocode/`, `Orbit/` |
-| Module | `Concept` | `Focus`, `Interpolate`, `Backward` |
-| Function | `Verb[.Noun]` | `Fft`, `Compress.Range`, `Estimate.Doppler` |
-| Type | `ContextNoun` | `FlightBurst`, `OrbitState` |
-| Interface | `ResourceRole` | `StorageWriter`, `ConfigReader` |
-| Error | `ContextError` | `FocusError`, `ParseError` |
-| Constant | `UPPER.CASE.PATH` | `SPEED.OF.LIGHT`, `MAX.ITERATIONS` |
-| Private | `_prefix` | `_internal`, `_helper` |
-| Test | prose description | `test "FFT preserves energy"` |
-
-Concept: a cohesive unit of domain behavior (noun or verb representing primary operation).
-
-Typed values over primitives:
+Names compress meaning. Types prevent misuse.
 
 ```text
--- Primitive obsession (avoid)
-function Compute.Doppler(wavelength: Float, velocity: Float) -> Float
+-- Low semantic density
+function Process(id: String, data: Dict, flag: Bool) -> Dict
 
--- Typed domain values (prefer)
-function Compute.Doppler(wavelength: Wavelength, velocity: Velocity) -> Frequency
+-- High semantic density
+function Settle.Trade(id: TradeId, terms: SettlementTerms) -> Settlement
 ```
 
-Make illegal states unrepresentable: use types to prevent invalid combinations.
+Type distinctions: Use distinct types to prevent confusion where confusion causes harm. `AccountId` vs `UserId` prevents transposition errors that `String` vs `String` permits. Apply proportionally—not every string requires a newtype.
+
+Naming patterns (adapt separator to language idiom):
+
+| Element | Pattern | Rationale |
+| ------- | ------- | --------- |
+| Function | `Verb.Noun` | Action and target explicit |
+| Type | `ContextNoun` | Domain concept with scope |
+| Constant | `SEMANTIC_NAME` | Meaning over value |
+
+When naming is difficult, the abstraction is likely wrong.
 
 ### Composition
 
-Small, composable units. Data flows through transformations.
+Granularity is a judgment call. Neither "many tiny functions" nor "few large functions" is universally correct.
 
-```text
-result = (
-    raw_samples
-    |> Apply.Window
-    |> Fft
-    |> Correlate(chirp)
-    |> Ifft
-)
+Heuristics for decomposition:
+- Extract when a block has a name that clarifies intent
+- Extract when the same logic appears in multiple locations (after the second occurrence)
+- Extract when testing a subset in isolation provides value
 
-function Process.Swath(bursts: Stream[Burst]) -> Stream[Product]:
-    for burst in bursts:
-        yield Process.Burst(burst)  -- one burst in memory at a time
-```
+Heuristics against decomposition:
+- Logic is only used once and inline reading is clearer
+- Extraction requires passing many parameters or introduces awkward signatures
+- The "abstraction" merely moves code without adding understanding
 
-Function size heuristic: if it needs comments to section it, split it.
+Streaming and lazy evaluation reduce memory pressure when processing sequences. Apply when data volume warrants; unnecessary for small collections.
 
 ## Design
 
 ### Boundaries
 
-Validate at entry points. Trust typed internals.
-
-Validation boundaries:
-- External: untrusted (user input, sensor data, external APIs)
-- Module: semi-trusted (type contracts enforced)
-- Function interior: trusted (invariants hold by construction)
+Boundaries occur where trust transitions. Parse at boundaries; trust typed internals thereafter.
 
 ```text
-function Parse.Orbit.Data(raw: Bytes) -> Result[OrbitState, ParseError]:
-    if not Valid.Epoch(raw.epoch):
-        return Error(ParseError("invalid epoch"))
-    return Ok(OrbitState(...))
-
-function Propagate.Orbit(state: OrbitState, dt: Duration) -> OrbitState:
-    -- state already validated; only check critical numerical invariants
-    return Integrate(state, dt)
+Untrusted → [Parse] → Domain Values → [Logic] → [Effect] → External
 ```
 
-Parse, do not validate: transform untyped input into typed domain values at boundary.
+Boundary locations:
+- System edges: user input, network, filesystem, external APIs
+- Subsystem interfaces: between teams, services, bounded contexts
 
-Prefer allowlist over denylist: define what IS valid, reject everything else.
+Not boundaries: Internal function calls between trusted components operating on validated domain types within the same trust domain. Redundant validation here is noise. However, treat team or security boundaries as trust transitions even within a single process.
 
-### Budgets
+Parse, don't validate: transform unstructured input into typed domain values. The type system then enforces invariants—re-checking is unnecessary and obscures where trust is actually established.
 
-Explicit lifecycle. Bounded allocation. Deadline awareness.
+Smart constructors: Hide type constructors. Expose only parsing functions.
 
 ```text
-type FftWorkspace:
-    buffer: Array  -- preallocated, reused
+module Email:
+    type Email (private)
+    function parse(raw: String) -> Result[Email, ParseError]
+```
 
-function Compress.Range(samples, workspace: FftWorkspace) -> Compressed:
-    Fft.Inplace(samples, workspace.buffer)
-    return Compressed(workspace.buffer.copy())
+All instances valid by construction. No runtime validation needed thereafter.
 
-function Process.Swath(bursts, deadline: Timestamp) -> Result[Swath, Error]:
+### Resources
+
+Explicit lifecycle management when resources are scarce or expensive.
+
+When to apply: Database connections, file handles, memory buffers in tight loops, operations with hard deadlines.
+
+When unnecessary: Short-lived computations with abundant resources, garbage-collected environments where resource pressure is absent.
+
+```text
+function Process.Batch(items, deadline: Timestamp) -> Result[Batch, Error]:
     results = []
-    for burst in bursts:
-        remaining = deadline - Now()
-        if remaining <= 0:
-            return Ok(PartialSwath(results, reason="deadline"))
-        results.append(Process.Burst(burst, timeout=remaining))
-    return Ok(Swath(results))
+    for item in items:
+        if Now() > deadline:
+            return Ok(PartialBatch(results, reason="deadline"))
+        results.append(Process(item))
+    return Ok(Batch(results))
 ```
-
-Progress signals: long operations emit periodic heartbeats for observability.
-
-Principles:
-- Explicit ownership: clear which component owns which resource
-- Acquire contextually: use context managers / RAII patterns
-- Reserve headroom: leave margin for transient allocation
 
 ### Observability
 
-Structured telemetry. Causal tracing. No silent failures.
+Structured telemetry enables diagnosis. Emit events with operation identifiers; trace causality across calls.
+
+When essential: Production services, distributed systems, long-running operations, anything where post-hoc diagnosis is required.
+
+When optional: Local scripts, exploratory code, tests (which have their own assertions).
 
 ```text
-type ProcessingStarted:
-    operation_id: UUID
-    burst_id: BurstID
-    timestamp: Timestamp
-
-function Process.Burst(burst, ctx: TraceContext) -> Result[Product, Error]:
-    Emit(ProcessingStarted(ctx.operation_id, burst.id, Now()))
-    result = Do.Processing(burst)
-    Emit(ProcessingCompleted(ctx.operation_id, result.status, Elapsed()))
+function Execute(op: Operation, trace: TraceContext) -> Result:
+    Emit(Started(trace.id, op.id, Now()))
+    result = Perform(op)
+    Emit(Completed(trace.id, result.status, Elapsed()))
     return result
 ```
 
-All errors logged with context sufficient to diagnose from telemetry alone.
+Errors should carry sufficient context for diagnosis without access to the original environment.
 
-- Context propagation: pass trace context through call stack
-- No catch-and-ignore: every exception handled or re-raised with context
+### Resilience
 
-### Degradation
-
-Graceful fallbacks. Partial success over total failure.
+Graceful degradation when full success is impossible.
 
 ```text
-type ProcessingResult:
-    product: Product
-    quality: QualityLevel  -- Full, Degraded, Minimal
+type Result:
+    output: Output
+    quality: Full | Degraded | Partial
     warnings: List[Warning]
-    skipped: List[SkippedItem]
-
-function Geolocate(point, dem) -> Result[Location, Error]:
-    result = Geolocate.With.Dem(point, dem)
-    if result.is_error() and Is.Dem.Unavailable(result.error):
-        return Geolocate.Ellipsoid(point)  -- fallback to simpler model
-    return result
 ```
+
+When to apply: User-facing services, batch processing where partial results have value, systems where availability trumps consistency.
+
+When inappropriate: Safety-critical systems where partial results are dangerous, transactions requiring atomicity.
+
+### Concurrency
+
+Prefer message-passing over shared mutable state. Immutable data crosses thread boundaries without synchronization.
+
+When shared state is unavoidable:
+- Encapsulate synchronization within a module
+- Expose a pure interface to callers
+- Prefer structured concurrency (task groups, scopes) over unstructured spawning
+
+Concurrency correctness follows from the same principles: information hiding, explicit dependencies, total functions.
 
 ## Checks
 
 ### Totality
 
-Handle all inputs. No partial functions in core.
+Handle all representable inputs. Partial functions—those undefined for some inputs—propagate failure modes silently.
 
-Result types for domain errors:
+Refined input types eliminate partiality at the source:
+
+```text
+-- Partial
+function first(xs: List[A]) -> A
+
+-- Total via refined input
+function first(xs: NonEmpty[A]) -> A
+
+-- Total via refined output
+function first(xs: List[A]) -> Option[A]
+```
+
+Prefer refined inputs when callers can guarantee the constraint. Prefer refined outputs when the constraint is situational.
+
+Result types model expected failure as values:
 
 ```text
 function Parse.Config(text) -> Result[Config, ConfigError]:
-    if Missing.Required.Field(text):
-        return Error(ConfigError("missing field"))
+    if Missing.Field(text, "required"):
+        return Error(ConfigError.MissingField("required"))
     return Ok(Config(...))
 ```
 
-Railway-oriented chaining:
+When to use Result: Failure is a normal outcome. Callers must handle the failure case. The error carries domain-relevant information.
+
+When to let exceptions propagate: Failure indicates a bug. Recovery is impossible or meaningless. The call site cannot usefully handle the error.
+
+Exhaustive pattern matching ensures all cases are handled. Avoid catch-all branches that silently swallow unexpected variants.
+
+Use assert_never (or equivalent) to make inexhaustive matches a type error:
 
 ```text
-function Process(input) -> Result[Output, Error]:
-    return (
-        Validate(input)
-        .bind(Transform)
-        .bind(Enrich)
-        .bind(Format)
-    )
-
-match Process(input):
-    case Ok(output): Write.Output(output)
-    case Error(e): Log.Error(e)
+match status:
+    case Pending(): handle_pending()
+    case Active(): handle_active()
+    case _: assert_never(status)  -- type error if cases missing
 ```
 
-Exhaustive matching: handle all cases explicitly, avoid catch-all patterns.
+### Effects
 
-Error context with remediation:
+Effect types distinguish computational contexts.
+
+| Type | Meaning | Use When |
+| ---- | ------- | -------- |
+| Result[A, E] | May fail with E | Parsing, validation, fallible operations |
+| Option[A] | May be absent | Lookup, search, nullable replacement |
+| List[A] | Multiple results | Non-determinism, queries |
+| IO[A] | External effects | Files, network, time, randomness |
+
+Result and Option are values (pure). IO describes effects (impure when executed).
+
+### Testing
+
+Testing strategy follows from code structure, not vice versa.
+
+| Component | Approach | Rationale |
+| --------- | -------- | --------- |
+| Pure functions | Unit tests, property tests | Deterministic, fast, high coverage achievable |
+| Effectful code | Integration tests | Verify coordination and external interaction |
+| Boundaries | Contract tests | Validate parsing, serialization, protocol compliance |
+
+Property tests are valuable when algebraic properties exist: round-trip (encode/decode), associativity, commutativity, invariant preservation. Not every function has meaningful properties—example-based tests suffice when properties are absent or contrived.
 
 ```text
-type ProcessingError:
-    stage: String          -- "Range.Compression"
-    input_id: String       -- "burst_042"
-    reason: String         -- "insufficient samples"
-    remediation: String?   -- "increase burst duration"
+property "serialize then parse is identity":
+    for all x in Valid.Inputs():
+        assert Parse(Serialize(x)) == x
 ```
 
-Numerical stability:
+## Heuristics
 
-```text
-function Compute.Arcsin(x) -> Result[Float, MathError]:
-    if Abs(x) > 1.0:
-        return Error(MathError("arcsin domain violation"))
-    return Ok(Arcsin(x))
+When principles conflict, these defaults often apply. Context overrides.
 
-function Compress.Signal(signal) -> Result[Compressed, Error]:
-    input_energy = Sum(Abs(signal) ** 2)
-    compressed = Do.Compression(signal)
-    output_energy = Sum(Abs(compressed) ** 2)
-    if not (0.9 <= output_energy / input_energy <= 1.1):
-        return Error(StabilityError("energy not conserved"))
-    return Ok(compressed)
-```
+| Tension | Default | Override When |
+| ------- | ------- | ------------- |
+| Abstraction vs Concreteness | Delay abstraction until second use | Pattern is well-established and stable |
+| DRY vs Locality | Tolerate duplication over wrong abstraction | Duplication causes actual maintenance burden |
+| Depth vs Breadth | Deeper modules with simpler interfaces | Interface complexity is inherent to domain |
+| Purity vs Pragmatism | Pure where feasible | Performance or interop requires mutation |
+| Explicit vs Implicit | Explicit dependencies and effects | Boilerplate overwhelms signal |
 
-Distinction:
-- Domain error: expected, recoverable, part of business logic
-- Programming error: unexpected, indicates bug, should crash
+Universal defaults: Measure before optimizing. Delete before commenting. Simplify before generalizing.
 
-## Constants
+## Application
 
-Named values at appropriate scope. No magic numbers.
+This guide informs decision-making. It does not substitute for it.
 
-Hierarchy:
-- Library: `Lib/Const` - physical, mathematical invariants
-- Package: `Package/Const` - domain-specific to that package
-- Module: internal constant at top - local to module only
+Before applying any pattern:
+1. Identify the problem's actual constraints and forces
+2. Evaluate whether the pattern addresses those forces
+3. Consider the pattern's cost against its benefit in this context
+4. Select the simplest approach that adequately addresses the problem
 
-```text
-SPEED.OF.LIGHT = 299792458           -- m/s, library
-EARTH.RADIUS.EQUATORIAL = 6378137    -- m, library
-
-RANGE.WINDOW.OVERSAMPLE = 1.2        -- package
-AZIMUTH.AMBIGUITY.MARGIN = 0.1       -- package
-
-_MAX.ITERATIONS = 100                -- module internal
-_CONVERGENCE.TOLERANCE = 1e-9        -- module internal
-```
-
-Semantic names over values. Document derivation in comments.
-
-## Testing
-
-Verification through types, tests, lints, and property checks.
-
-Unit tests: pure functions, deterministic, fast.
-
-```text
-test "range compression preserves signal energy":
-    signal = Make.Chirp(bandwidth=50e6, duration=10e-6)
-    compressed = Compress.Range(signal, chirp_replica)
-    assert Energy.Ratio(compressed, signal) within (0.95, 1.05)
-
-test "orbit interpolation is smooth":
-    states = [Propagate(initial, t) for t in Range(0, 100, 10)]
-    velocities = Diff(Positions(states)) / 10
-    assert Max(Diff(velocities)) < SMOOTHNESS.THRESHOLD
-```
-
-Property tests: invariants that hold for all inputs.
-
-```text
-property "compression then decompression recovers signal":
-    for all signal in Arbitrary.Signals():
-        compressed = Compress(signal)
-        recovered = Decompress(compressed)
-        assert Signals.Equal(signal, recovered, tolerance=1e-6)
-```
-
-Integration tests:
-- Pipeline flows with fixtures
-- Boundary crossing with real systems
-- Failure modes: verify degradation and recovery paths
-
-Property test categories:
-- Round-trip: encode/decode, transform/inverse
-- Metamorphic: relationships between related inputs
+The best code often uses no named pattern at all. It simply solves the problem with clarity.
