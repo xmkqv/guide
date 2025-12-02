@@ -16,3 +16,12 @@ __pycache__/
 .cache/
 .pytest_cache/
 .ruff_cache/
+
+# 
+
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+*.html

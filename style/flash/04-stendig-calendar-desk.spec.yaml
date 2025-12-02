@@ -1,0 +1,49 @@
+mood: intellectual confidence
+
+intent: typography as aesthetic statement; taste signaling through object selection
+
+description: |
+  Bold Stendig calendar dominates—Massimo Vignelli's grid as wall art.
+  Warm walnut desk grounds the composition. An iMac, a plant, a diffuser.
+  The left half is pure white negative space.
+  Every object is a choice. The calendar says: we know design history.
+
+influences:
+  - Massimo Vignelli (explicitly via Stendig)
+  - Swiss typography
+  - Kinfolk/Cereal editorial styling
+  - Stripe Press book design
+
+era: timeless modernist, contemporary workspace
+
+palette:
+  primary: warm white - generous, breathing
+  accent: true black typography, warm walnut
+  relationship: high contrast type on neutral field
+  temperature: warm-neutral
+
+composition:
+  density: sparse left, active right
+  balance: intentional asymmetry, visual weight right
+  depth: flat, editorial
+
+texture:
+  grain: smooth surfaces, wood warmth
+  edges: crisp typography, soft organic plant
+
+keywords:
+  - typography
+  - intellectual
+  - editorial
+  - minimal
+  - workspace
+  - design-conscious
+  - vignelli
+  - professional
+
+anti_patterns:
+  - decorative fonts
+  - busy desk surfaces
+  - colorful accessories
+  - motivational quotes
+  - cable clutter

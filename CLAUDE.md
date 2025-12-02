@@ -1,2 +1,2 @@
-@/Users/m/guide/style/code.md
-@/Users/m/guide/style/python.md
+@/Users/m/guide/docs/code.md
+@/Users/m/guide/docs/python.md

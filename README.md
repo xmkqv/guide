@@ -29,19 +29,30 @@ datasets?: {list[loader]}
 
 ## Design
 
+Specs decompose mission into irreducible, orthogonal, necessary, and consequential elements.
+
 ```sql
+type test (
+    path text, -- qualified path to programmatic test
+    result jsonb
+)
+
+type plot (
+    type text,
+    path text,
+    desc text
+)
+
 spec(
-    id text /S\d+/ pk, 
-    name text,
-    aspect_id text /S\d+/ fk spec.id,
-    detail jsonb
+    key text pk generated always as random_hex(len=3),
+    def text,
+    test? test,
+    code? code,
+    plot? plot,
+    detail jsonb,
+    aspect_key text fk spec.key,
 )
 ```
-
-- Idea: aspect_id = null
-  - Unstructured multimodel information eg {tenets, sketches, scenarios, behaviors, exemplars, ...}.
-- Directive: aspect_id != null
-  - Irreducible, orthogonal, necessary, and consequential element of spec decomposition
 
 ## Code
 
@@ -76,7 +87,8 @@ Optional dataset manifest.
 ```sql
 loader(
     ref text,
-    target text
+    target text,
+    detail jsonb
 )
 ```
 
@@ -87,5 +99,4 @@ loader(
 guide
 ```
 
-- [Exemplar](./exemplar.md)
-
+- [Walkthrough](./walkthroughs/mission.md)

@@ -1,0 +1,163 @@
+# Image Spec Schema
+# Generated from image analysis. Required fields + open discovery.
+# Version: 0.1.0
+
+_meta:
+  description: Schema for {name}.spec.yaml files generated from image analysis
+  version: 0.1.0
+
+# ============================================
+# REQUIRED FIELDS
+# Analyzer MUST produce these
+# ============================================
+
+required:
+  source:
+    type: string
+    description: Path to source image (relative to style directory)
+    example: "reference.png"
+
+  extracted_at:
+    type: datetime
+    description: ISO 8601 timestamp of extraction
+    example: "2025-12-01T14:30:00Z"
+
+  palette:
+    type: object
+    description: Extracted color information
+    fields:
+      dominant:
+        type: list[color_entry]
+        description: Primary colors by area coverage
+        min_items: 1
+        max_items: 5
+      accent:
+        type: list[color_entry]
+        description: Highlight/contrast colors
+        max_items: 3
+      neutral:
+        type: list[color_entry]
+        description: Background/supporting colors
+        max_items: 3
+
+  composition:
+    type: object
+    description: Spatial analysis
+    fields:
+      balance:
+        type: float
+        range: [-1, 1]
+        description: Visual weight distribution (-1=left, 0=center, 1=right)
+      density:
+        type: float
+        range: [0, 1]
+        description: Visual fill (0=sparse, 1=dense)
+      focal_points:
+        type: list[point_weight]
+        description: Areas of visual attention
+        example: [[0.3, 0.4, 0.8], [0.7, 0.2, 0.4]]
+
+  texture:
+    type: object
+    description: Surface qualities
+    fields:
+      grain:
+        type: float
+        range: [0, 1]
+        description: Noise/texture amount (0=smooth, 1=heavy)
+      organic:
+        type: float
+        range: [0, 1]
+        description: Shape character (0=geometric, 1=organic)
+
+  affect:
+    type: object
+    description: Felt qualities (perceptual/emotional)
+    fields:
+      temperature:
+        type: float
+        range: [-1, 1]
+        description: Color warmth (-1=cold, 1=warm)
+      weight:
+        type: float
+        range: [-1, 1]
+        description: Visual heaviness (-1=light, 1=heavy)
+      energy:
+        type: float
+        range: [-1, 1]
+        description: Dynamic quality (-1=calm, 1=energetic)
+
+# ============================================
+# PRESET FIELDS (Optional, but semantics fixed)
+# If present, must conform to type
+# ============================================
+
+presets:
+  size:
+    type: tuple[int, int]
+    description: Image dimensions (width, height)
+    example: [1920, 1080]
+
+  aspect_ratio:
+    type: float
+    description: Width / height
+    example: 1.778
+
+  typography:
+    type: object
+    description: Detected text properties (if any)
+    fields:
+      detected: bool
+      weight: float  # 100-900 normalized
+      style: string  # serif, sans, mono, display
+      contrast: float  # stroke variation
+
+  contrast_ratio:
+    type: float
+    description: Overall luminance contrast
+    range: [1, 21]
+
+  color_harmony:
+    type: string
+    description: Detected color scheme
+    enum: [monochromatic, analogous, complementary, triadic, split-complementary, tetradic]
+
+  anti_patterns:
+    type: list[string]
+    description: What breaks this aesthetic
+
+  influences:
+    type: list[string]
+    description: Specific design lineage (artists, movements, works)
+
+# ============================================
+# OPEN FIELDS
+# Analyzer may add anything discovered
+# ============================================
+
+open:
+  description: |
+    Any additional fields the analyzer discovers or generates.
+    No restrictions on keys or types.
+    Examples:
+      - detected_patterns: ["stripes", "dots"]
+      - mood_tags: ["contemplative", "urban"]
+      - era_guess: "1970s"
+      - influences: ["bauhaus", "swiss"]
+      - anomalies: ["unusual saturation spike at corners"]
+
+# ============================================
+# TYPE DEFINITIONS
+# ============================================
+
+types:
+  color_entry:
+    type: object
+    fields:
+      hex: string      # "#RRGGBB"
+      weight: float    # 0-1, area coverage
+      name: string     # semantic descriptor (void, shadow, highlight), not positional (color1)
+
+  point_weight:
+    type: tuple[float, float, float]
+    description: (x, y, attention_weight) where x,y in [0,1]

@@ -1,0 +1,104 @@
+# Default Style
+# Migrated from tokens.css - warm professional palette
+#
+# Drop images here to influence this style.
+
+_meta:
+  version: "0.1.0"
+  composed_at: null
+  sources: []
+
+# ============================================
+# USER OVERRIDES (use # LOCKED to freeze)
+# ============================================
+
+intent: "Professional warmth. Grounded, not cold. Accessible, not casual."
+
+# ============================================
+# PALETTE
+# ============================================
+
+palette:
+  dominant:
+    - { hex: "#133554", weight: 0.4, name: "deep-blue" }
+    - { hex: "#2c2c2c", weight: 0.3, name: "body" }
+  accent:
+    - { hex: "#56a877", weight: 0.5, name: "soft-earth-green" }
+    - { hex: "#ef4888", weight: 0.3, name: "magenta" }
+    - { hex: "#b98f79", weight: 0.2, name: "sand" }
+  neutral:
+    - { hex: "#f1f1f2", weight: 0.5, name: "earthstone-gray" }
+    - { hex: "#ffffff", weight: 0.3, name: "surface" }
+    - { hex: "#f7f7f7", weight: 0.2, name: "subtle" }
+  semantic:
+    primary: "#133554"
+    accent: "#56a877"
+    highlight: "#ef4888"
+    surface: "#ffffff"
+    text: "#2c2c2c"
+    muted: "#555555"
+
+# ============================================
+# TYPOGRAPHY
+# ============================================
+
+typography:
+  scale:
+    ratio: 1.25  # Major Third
+    base_print: "10pt"
+    base_screen: "16px"
+    steps: [xs, sm, md, lg, xl, 2xl, 3xl]
+  weights: [400, 500, 600, 700, 900]
+  line_heights:
+    tight: 1.15
+    base: 1.4
+    relaxed: 1.5
+    loose: 1.8
+  measure:
+    narrow: "45ch"
+    base: "65ch"
+    wide: "80ch"
+
+# ============================================
+# SPACING
+# ============================================
+
+spacing:
+  base: 4
+  scale: [4, 6, 8, 10, 12, 16, 20, 24, 32]
+  philosophy: "generous, not wasteful"
+
+# ============================================
+# AFFECT (derived from palette analysis)
+# ============================================
+
+affect:
+  temperature: 0.3   # slightly warm
+  weight: 0.1        # balanced, slight gravitas
+  energy: -0.2       # calm, professional
+
+# ============================================
+# TEXTURE
+# ============================================
+
+texture:
+  grain: 0.1         # mostly smooth
+  organic: 0.3       # slight organic feel
+
+# ============================================
+# COMPOSITION
+# ============================================
+
+composition:
+  balance: 0.0       # centered
+  density: 0.4       # moderate whitespace
+
+# ============================================
+# CONSTRAINTS
+# ============================================
+
+anti_patterns:
+  - "pure black backgrounds"
+  - "neon colors"
+  - "heavy drop shadows"
+  - "busy patterns"

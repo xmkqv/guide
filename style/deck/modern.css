@@ -1,0 +1,265 @@
+/**
+ * Modern Theme
+ * Bold gradients, vibrant colors, high energy
+ * Dark base with gradient accents
+ * Usage: --css tokens.css,deck/base.css,deck/modern.css
+ */
+
+@import url('./base.css');
+
+/* ========================================
+   MODERN COLOR PALETTE
+   Vibrant gradients & high contrast
+   ======================================== */
+
+:root {
+  /* Gradient colors */
+  --modern-purple: #667eea;
+  --modern-pink: #764ba2;
+  --modern-blue: #4158d0;
+  --modern-cyan: #43cea2;
+  --modern-orange: #ff6b6b;
+  --modern-yellow: #ffd93d;
+
+  /* Backgrounds */
+  --modern-dark: #1a1a2e;
+  --modern-darker: #0f0f1e;
+}
+
+/* ========================================
+   BASE STYLING
+   ======================================== */
+
+body {
+  background: var(--modern-darker);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: #ffffff;
+}
+
+.slide {
+  background: var(--modern-dark);
+  color: #ffffff;
+  padding: var(--slide-padding) var(--slide-padding-lg);
+}
+
+/* ========================================
+   HERO SLIDE - Gradient background
+   ======================================== */
+
+.slide.hero {
+  background: linear-gradient(135deg, var(--modern-purple) 0%, var(--modern-pink) 100%);
+  color: #ffffff;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.slide.hero h1 {
+  font-size: var(--slide-fs-title);
+  font-weight: var(--fw-black);
+  line-height: var(--lh-tight);
+  margin-block-end: 40px;
+  letter-spacing: -3px;
+  background: linear-gradient(90deg, #ffffff 0%, rgba(255,255,255,0.8) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.slide.hero .tagline {
+  font-size: clamp(40px, 4vh, 64px);
+  font-weight: var(--fw-normal);
+  opacity: 0.95;
+  letter-spacing: 1px;
+}
+
+/* ========================================
+   DYNAMIC CONTENT SLIDE
+   ======================================== */
+
+.slide.dynamic {
+  background: var(--modern-dark);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Subtle gradient backdrop */
+.slide.dynamic::before {
+  content: "";
+  position: absolute;
+  inset-block-start: -50%;
+  inset-inline-end: -20%;
+  inline-size: 800px;
+  block-size: 800px;
+  background: radial-gradient(circle, var(--modern-purple) 0%, transparent 70%);
+  opacity: 0.15;
+  pointer-events: none;
+}
+
+.slide.dynamic h2 {
+  font-size: var(--slide-fs-h2);
+  font-weight: var(--fw-black);
+  margin-block-end: 60px;
+  background: linear-gradient(135deg, var(--modern-cyan) 0%, var(--modern-blue) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.slide.dynamic ul {
+  list-style: none;
+  font-size: var(--slide-fs-body);
+  line-height: var(--lh-loose);
+}
+
+.slide.dynamic li {
+  margin-block-end: 35px;
+  padding-inline-start: 60px;
+  position: relative;
+  transition: transform var(--transition-base);
+}
+
+.slide.dynamic li::before {
+  content: "→";
+  position: absolute;
+  inset-inline-start: 0;
+  font-weight: var(--fw-bold);
+  font-size: 48px;
+  background: linear-gradient(90deg, var(--modern-orange), var(--modern-yellow));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ========================================
+   SPLIT SECTION SLIDE
+   ======================================== */
+
+.slide.split {
+  background: linear-gradient(
+    90deg,
+    var(--modern-dark) 0%,
+    var(--modern-dark) 50%,
+    var(--modern-darker) 50%,
+    var(--modern-darker) 100%
+  );
+  display: flex;
+  flex-direction: row;
+  gap: 100px;
+  padding: var(--slide-padding-lg);
+}
+
+.split-half {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.split-half h3 {
+  font-size: clamp(48px, 5vh, 72px);
+  font-weight: var(--fw-bold);
+  margin-block-end: 30px;
+  color: var(--modern-yellow);
+}
+
+.split-half p {
+  font-size: clamp(28px, 3vh, 42px);
+  line-height: var(--lh-relaxed);
+  opacity: 0.9;
+}
+
+/* ========================================
+   BOLD CLOSING SLIDE
+   ======================================== */
+
+.slide.bold {
+  background: linear-gradient(135deg, var(--modern-orange) 0%, var(--modern-pink) 100%);
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.slide.bold h2 {
+  font-size: clamp(120px, 12vh, 180px);
+  font-weight: var(--fw-black);
+  line-height: var(--lh-tight);
+  letter-spacing: -4px;
+  margin-block-end: 40px;
+  text-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+
+.slide.bold p {
+  font-size: clamp(40px, 4vh, 64px);
+  font-weight: var(--fw-normal);
+  opacity: 0.95;
+}
+
+/* ========================================
+   CARD ELEMENTS
+   ======================================== */
+
+.card {
+  background: rgba(255,255,255,0.05);
+  border: 2px solid rgba(255,255,255,0.1);
+  border-radius: 16px;
+  padding: 40px;
+  backdrop-filter: blur(10px);
+  margin-block: 20px;
+}
+
+.card-title {
+  font-size: clamp(32px, 3vh, 48px);
+  font-weight: var(--fw-bold);
+  color: var(--modern-cyan);
+  margin-block-end: 15px;
+}
+
+.card-content {
+  font-size: 28px;
+  line-height: var(--lh-relaxed);
+  opacity: 0.9;
+}
+
+/* ========================================
+   ACCENT BLOCKS
+   ======================================== */
+
+.accent-block {
+  background: linear-gradient(135deg, var(--modern-purple), var(--modern-pink));
+  padding: 40px;
+  border-radius: 12px;
+  margin-block: 30px;
+  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+}
+
+/* ========================================
+   FOOTER
+   ======================================== */
+
+.footer {
+  font-size: var(--slide-fs-footer);
+  opacity: 0.5;
+}
+
+/* ========================================
+   HIGHLIGHT ELEMENTS
+   ======================================== */
+
+.highlight {
+  background: linear-gradient(90deg, var(--modern-orange), var(--modern-yellow));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: var(--fw-bold);
+}
+
+.big-number {
+  font-size: clamp(120px, 12vh, 180px);
+  font-weight: var(--fw-black);
+  line-height: var(--lh-tight);
+  background: linear-gradient(135deg, var(--modern-cyan), var(--modern-blue));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}

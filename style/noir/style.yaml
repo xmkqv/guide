@@ -1,0 +1,68 @@
+# Noir Style
+# High contrast, dramatic, cinematic
+#
+# Drop images here to influence this style.
+
+_meta:
+  version: "0.1.0"
+  composed_at: null
+  sources: []
+
+# ============================================
+# USER OVERRIDES
+# ============================================
+
+intent: "Cinematic tension. Deep shadows, punctuated light. Urban melancholy."
+
+palette:
+  dominant:
+    - { hex: "#0a0a0a", weight: 0.6, name: "void" }  # LOCKED
+    - { hex: "#1a1a1a", weight: 0.25, name: "shadow" }
+  accent:
+    - { hex: "#ff4444", weight: 0.4, name: "danger" }
+    - { hex: "#f4f4f4", weight: 0.4, name: "highlight" }
+  neutral:
+    - { hex: "#2a2a2a", weight: 0.5, name: "surface" }
+    - { hex: "#3a3a3a", weight: 0.3, name: "elevated" }
+
+# ============================================
+# AFFECT
+# ============================================
+
+affect:
+  temperature: -0.6  # cold
+  weight: 0.7        # heavy
+  energy: 0.2        # simmering tension
+
+# ============================================
+# TEXTURE
+# ============================================
+
+texture:
+  grain: 0.6         # film grain
+  organic: 0.4       # urban geometry with decay
+
+# ============================================
+# COMPOSITION
+# ============================================
+
+composition:
+  balance: 0.2       # slight asymmetry
+  density: 0.6       # fills frame
+  contrast_style: "chiaroscuro"
+
+# ============================================
+# CONSTRAINTS
+# ============================================
+
+anti_patterns:
+  - "bright cheerful colors"
+  - "rounded friendly shapes"
+  - "flat design"
+  - "pastels"
+
+influences:
+  - "film noir"
+  - "blade runner"
+  - "sin city"
+  - "tokyo night photography"

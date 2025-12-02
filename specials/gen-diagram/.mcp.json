@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "likec4": {
+      "command": "npx",
+      "args": ["-y", "@likec4/mcp"],
+      "env": {
+        "LIKEC4_WORKSPACE": "/Users/m/guide/specials/gen-diagram/architecture"
+      }
+    }
+  }
+}

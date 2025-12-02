@@ -1,0 +1,91 @@
+_meta:
+  sources:
+    - 01-mustard-chair-geometry.spec.yaml
+    - 02-lamp-sage-negative.spec.yaml
+    - 03-concrete-blush-industrial.spec.yaml
+    - 04-stendig-calendar-desk.spec.yaml
+    - 05-megaphone-orange-wry.spec.yaml
+  composed_at: 2025-12-01T23:45:00Z
+
+intent: |
+  Professional confidence with latent energy. The aesthetic of people who have
+  nothing to prove but everything to build. Intellectual without being cold,
+  ambitious without being loud. A tennis pro at a charity doubles match.
+
+mood: quiet power with veiled intensity
+
+description: |
+  Restrained surfaces with occasional controlled explosions of color.
+  Negative space is a feature, not emptiness. Every object earns its place.
+  The style draws from Scandinavian calm and Swiss precision, but isn't afraid
+  of warmth—mustard, blush, orange appear as confident punctuation.
+  Industrial materials (concrete, steel) meet considered design (Vignelli, Finn Juhl).
+  The vibe says: serious work happens here, and we have taste.
+
+influences:
+  - Dieter Rams functional elegance
+  - Danish modern furniture (Finn Juhl)
+  - Kinfolk/Cereal editorial styling
+  - Stripe Press intellectual restraint
+  - Massimo Vignelli typography
+  - Swiss design grid systems
+  - Scandinavian functionalism
+  - Tadao Ando concrete minimalism
+  - Linear.app design sensibility
+  - David Shrigley deadpan humor
+  - Wes Anderson object isolation
+
+palette:
+  summary: neutral fields with warm confident accents
+  primary: warm white to cool grey spectrum
+  accents:
+    - mustard gold
+    - sage green
+    - dusty blush
+    - saturated orange
+    - matte black
+  temperature: warm-neutral foundation, accent-dependent warmth
+
+composition:
+  summary: |
+    Sparse by default. Negative space as deliberate choice.
+    Asymmetric but balanced. Single focal points.
+    Deep architectural perspectives or flat editorial framing.
+
+texture:
+  summary: |
+    Smooth, matte surfaces dominate. Raw concrete as counterpoint.
+    Clean edges with occasional organic relief (plants, wood grain).
+    No noise, no grain, no distress.
+
+keywords:
+  - minimal
+  - professional
+  - confident
+  - intellectual
+  - editorial
+  - scandinavian
+  - typography
+  - negative-space
+  - industrial
+  - warm
+  - quiet-power
+  - startup-maturity
+  - wry
+  - restrained
+
+anti_patterns:
+  - busy patterns or textures
+  - multiple competing colors
+  - cluttered surfaces
+  - harsh shadows
+  - trendy decorative objects
+  - filling empty space
+  - warm/cozy lighting
+  - drop ceilings or carpet
+  - motivational posters or quotes
+  - decorative fonts
+  - trying too hard to be clever
+  - hustle culture aesthetics
+  - corporate stock photography
+  - garage/scrappy startup vibes

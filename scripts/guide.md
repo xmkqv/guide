@@ -7,7 +7,7 @@ model: opus
 Read and internalize the guide system:
 
 @/Users/m/guide/README.md
-@/Users/m/guide/exemplar.md
+@/Users/m/guide/walkthroughs/mission.md
 
 ## Directive
 
