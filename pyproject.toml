@@ -15,10 +15,12 @@ dependencies = [
     "returns>=0.24.0",
     "pydantic>=2.12.5",
     "pydantic-settings>=2.12.0",
-    "structlog>=24.0.0",
+    "snoop>=0.6.0",
     "pip>=24.0",
     "expression[pydantic]>=5.0.0",
     "watchfiles>=1.1.1",
+    "tyro>=0.9.0",
+    "rich>=13.0.0",
 ]
 
 [project.optional-dependencies]
@@ -29,7 +31,7 @@ dev = [
 ]
 
 [project.scripts]
-guide = "guide.__main__:main"
+guide = "guide.api.cli:main"
 
 [tool.pytest.ini_options]
 addopts = "--report-log=results/results.jsonl"
@@ -41,11 +43,8 @@ build-backend = "hatchling.build"
 [tool.hatch.metadata]
 allow-direct-references = true
 
-[tool.uv]
-prerelease = "allow"
-
 [tool.ruff]
-extend = "configs/ruff.toml"
+extend = "guides/configs/ruff.toml"
 
 [tool.ruff.lint.per-file-ignores]
 "scripts/*.py" = ["T201"]  # Allow print in CLI scripts

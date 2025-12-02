@@ -1,7 +1,0 @@
-{
-  "tool_name": "Write",
-  "tool_input": {
-    "file_path": "example.ts",
-    "content": "const greeting: string = 'Hello, World!';\nconsole.log(greeting);\n"
-  }
-}

@@ -16,11 +16,11 @@ Diagnostic: If satisfying architectural constraints requires more code than solv
 
 Three properties characterize well-structured code. They exist in tension.
 
-| Property | Meaning | Diagnostic |
-| -------- | ------- | ---------- |
+| Property                 | Meaning                                    | Diagnostic                                               |
+|--------------------------|--------------------------------------------|----------------------------------------------------------|
 | Referential transparency | Expressions substitutable for their values | Can this be inlined/extracted without behavioral change? |
-| Information locality | Related concerns colocated | Does understanding require traversing distant modules? |
-| Representation fidelity | Types encode domain invariants | Can invalid states be constructed? |
+| Information locality     | Related concerns colocated                 | Does understanding require traversing distant modules?   |
+| Representation fidelity  | Types encode domain invariants             | Can invalid states be constructed?                       |
 
 ## Complexity
 
@@ -47,12 +47,12 @@ Local mutation invisible to callers preserves referential transparency.
 
 No single pattern suits all problems. Patterns have applicability conditions.
 
-| Pattern | When Effective | When Not |
-| ------- | -------------- | -------- |
-| Functional core / Imperative shell | Logic separates cleanly from effects | Logic and effects inherently interleaved |
-| Ports and adapters | Dependencies vary or require test substitution | Single stable implementation |
-| Vertical slices | Features deploy independently | Features share significant logic |
-| Layered | Straightforward request-response | Domain doesn't align with layers |
+| Pattern                            | When Effective                                 | When Not                                 |
+|------------------------------------|------------------------------------------------|------------------------------------------|
+| Functional core / Imperative shell | Logic separates cleanly from effects           | Logic and effects inherently interleaved |
+| Ports and adapters                 | Dependencies vary or require test substitution | Single stable implementation             |
+| Vertical slices                    | Features deploy independently                  | Features share significant logic         |
+| Layered                            | Straightforward request-response               | Domain doesn't align with layers         |
 
 Anti-patterns:
 - Structural cargo culting: imposing architecture on problems that don't need it
@@ -75,11 +75,11 @@ Smart constructors: hide type constructors, expose only parsing functions. All i
 
 Names compress meaning. Types prevent misuse.
 
-| Element | Pattern | Rationale |
-| ------- | ------- | --------- |
-| Function | verb_noun | Action and target explicit |
-| Type | ContextNoun | Domain concept with scope |
-| Constant | SEMANTIC_NAME | Meaning over value |
+| Element  | Pattern       | Rationale                  |
+|----------|---------------|----------------------------|
+| Function | verb_noun     | Action and target explicit |
+| Type     | ContextNoun   | Domain concept with scope  |
+| Constant | SEMANTIC_NAME | Meaning over value         |
 
 When naming is difficult, the abstraction is likely wrong.
 
@@ -116,23 +116,23 @@ Errors carry sufficient context for diagnosis without access to the original env
 
 ## Testing
 
-| Component | Approach |
-| --------- | -------- |
+| Component      | Approach                   |
+|----------------|----------------------------|
 | Pure functions | Unit tests, property tests |
-| Effectful code | Integration tests |
-| Boundaries | Contract tests |
+| Effectful code | Integration tests          |
+| Boundaries     | Contract tests             |
 
 Property tests when algebraic properties exist: round-trip, associativity, invariant preservation.
 
 ## Tensions
 
-| Tension | Default | Override When |
-| ------- | ------- | ------------- |
-| Abstraction vs Concreteness | Delay abstraction until second use | Pattern is well-established |
-| DRY vs Locality | Tolerate duplication | Duplication causes maintenance burden |
-| Depth vs Breadth | Deeper modules | Interface complexity is inherent |
-| Purity vs Pragmatism | Pure where feasible | Profiling shows necessity |
-| Explicit vs Implicit | Explicit dependencies | Boilerplate overwhelms signal |
+| Tension                     | Default                            | Override When                         |
+|-----------------------------|------------------------------------|---------------------------------------|
+| Abstraction vs Concreteness | Delay abstraction until second use | Pattern is well-established           |
+| DRY vs Locality             | Tolerate duplication               | Duplication causes maintenance burden |
+| Depth vs Breadth            | Deeper modules                     | Interface complexity is inherent      |
+| Purity vs Pragmatism        | Pure where feasible                | Profiling shows necessity             |
+| Explicit vs Implicit        | Explicit dependencies              | Boilerplate overwhelms signal         |
 
 ## Defaults
 

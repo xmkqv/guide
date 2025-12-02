@@ -1,7 +1,0 @@
-{
-  "tool_name": "Write",
-  "tool_input": {
-    "file_path": "example.md",
-    "content": "# Hello\n\nThis text has **bold formatting** which should fail."
-  }
-}

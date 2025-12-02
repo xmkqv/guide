@@ -10,20 +10,32 @@
 ```sh
 # ~/.zshrc
 MARKDOWNLINT_CONFIG="$GUIDES_DIR/configs/.markdownlint.json"
-RUFF_CONFIG="$GUIDES_DIR/configs/ruff.toml"
 
 # ./vscode/settings.json; nb resolve variables
 ...
-"markdownlint.config": "${GUIDES_DIR}/configs/.markdownlint.json"
+"markdownlint.config": "${GUIDES_DIR}/configs/.markdownlint.json",
+
+# configs/claude/settings.json
 ...
-"biome.configurationPath": "${GUIDES_DIR}/configs/biome.json",
+ "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/m/qxotk/libs/guide/qxgo/qxgo"
+          }
+        ]
+      }
+    ]
+  },
+  ...
 ```
 
 ```bash
 ln -s "$GUIDES_DIR/configs/vscode/settings.json" {vscode_user_settings_path}
 ln -s "$GUIDES_DIR/configs/claude/settings.json" ~/.claude/settings.json
-ln -s "$GUIDES_DIR/configs/pyrightconfig.json"
-ln -s "$GUIDES_DIR/configs/biome.json" ~/biome.json
 ```
 
 # Preferences
@@ -32,7 +44,8 @@ ln -s "$GUIDES_DIR/configs/biome.json" ~/biome.json
 - meta.md
 - ml.md
 - prose.md
-- python.md
+- py.md
+- ts.md
 
 # Scripts
 
@@ -48,27 +61,3 @@ ln -s "$GUIDES_DIR/configs/biome.json" ~/biome.json
 
 - spec.schema.yaml
 - mood.schema.yaml
-
----
-
-HOW TO
-
----
-
-# Environment
-
-Environment Variables: direnv
-
-```bash
-direnv allow
-```
-
-```pt
-.env
-.env.{development|dev}
-.env.{production|prod}
-```
-
-# Entrypoint
-
-- justfile
