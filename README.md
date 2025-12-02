@@ -1,26 +1,35 @@
 
 Declarative anti-fragile self-healing reifier.
 
+# Usage
+
+```bash
+guide
+guide style sync # runs bash style/align.sh
+guide check # replace qxgo
+```
+
+- [Walkthrough](./walkthroughs/mission.md)
+
 # Mission
 
 ```sql
 enum Lang = {Py, Ts}
 
 mission (
-    id text pk generated always as lowercase-acronym(name),
     name text,
-    lang Lang
+    lang Lang,
+    design list[spec],
+    datasets? jsonb
 )
 ```
 
 - mission.yaml
 
 ```yaml
-id: {string}
 name: {string}
 lang: {lang}
 design: {list[spec]}
-signal: {list[test]}
 datasets?: {list[loader]}
 ```
 
@@ -33,12 +42,12 @@ Specs decompose mission into irreducible, orthogonal, necessary, and consequenti
 
 ```sql
 type test (
-    path text, -- qualified path to programmatic test
+    path text, -- qualified path to single programmatic test
     result jsonb
 )
 
-type plot (
-    type text,
+type limn (
+    type text, -- plot or diagram type
     path text,
     desc text
 )
@@ -47,38 +56,11 @@ spec(
     key text pk generated always as random_hex(len=3),
     def text,
     test? test,
-    code? code,
-    plot? plot,
+    limn? limn,
     detail jsonb,
-    aspect_key text fk spec.key,
+    design list[spec]
 )
 ```
-
-## Code
-
-Implementation intended to satisfy Specs.
-
-## Signal
-
-Lang determines the Tester, which parses programmatic tests and their results.
-
-```text
-1. tests = get_tests()
-2. for test in tests:
-    a. signal_test = to_signal_test(test)
-    b. add to signal if has spec_ids
-```
-
-```sql
-test(
-    id text /T\d+/ pk,
-    ref? text, -- qualified path to programmatic test
-    spec_ids (text /S\d+/)[], -- verified spec references
-    result jsonb -- framework structured test result
-)
-```
-
-- Inline Design Spec Ids Pattern: `@design(/S\d+/,...)`
 
 ## Datasets
 
@@ -91,12 +73,3 @@ loader(
     detail jsonb
 )
 ```
-
-# Usage
-
-```bash
-# Launch
-guide
-```
-
-- [Walkthrough](./walkthroughs/mission.md)

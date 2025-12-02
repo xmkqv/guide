@@ -9,13 +9,17 @@ TYPE=$ARGUMENTS[1]
 NAME=$ARGUMENTS[2]
 BRIEF="${ARGUMENTS[@]:3}"
 
+MOOD_DIR=$MOODS_DIR/$MOOD
+STYLE_YAML=$MOOD_DIR/style.yaml
+TOKENS_CSS=$MOOD_DIR/tokens.css
+
 # Role
 
 Generate an artifact in style $MOOD. The style (style.yaml + tokens.css) is the canonical visual language. TYPE and BRIEF guide how to apply it.
 
 # Task
 
-1. Read `style/$MOOD/style.yaml` and `style/$MOOD/tokens.css`
+1. Read $STYLE_YAML and $TOKENS_CSS
 2. Generate HTML embodying the style for $BRIEF
 3. Convert to PDF using decktape
 
@@ -43,7 +47,7 @@ This provides:
 - Report components from `style/docs/report.css`
 - Navigation for decktape from `style/docs/nav.js`
 
-For moodboard-specific styles, inline tokens from `style/$MOOD/tokens.css`.
+For moodboard-specific styles, inline tokens from $TOKENS_CSS.
 
 # Page Structure
 

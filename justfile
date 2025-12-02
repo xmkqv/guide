@@ -8,7 +8,3 @@ agent name task workdir=".":
     mcp_args=$([ -f .mcp.json ] && echo "--mcp-config .mcp.json" || echo "")
     exec claude $mcp_args --add-dir "$workdir" --verbose -p "use {{ name }}: {{ task }}"
 
-# Style system
-
-style-align:
-    bash style/align.sh

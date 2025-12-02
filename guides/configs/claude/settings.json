@@ -85,7 +85,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/Users/m/guide/qxgo/qxgo"
+            "command": "/Users/m/qxotk/libs/guide/qxgo/qxgo"
           }
         ]
       }

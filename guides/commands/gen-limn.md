@@ -1,17 +1,29 @@
 ---
 name: gen-diagram
 description: Generate architecture diagrams using LikeC4
-tools: mcp__likec4, Bash, Read, Edit, Write
+tools: Bash, Read, Edit, Write
 permissionMode: acceptEdits
+argument-hint: [path]
 ---
+
+PATH=$ARGUMENTS[0]
 
 # gen-diagram
 
-Generate comprehensive LikeC4 architecture diagrams from source.
+Generate LikeC4 architecture diagrams from source.
 
 ## Input
 
-Project directory via `--add-dir`. Read the specified file to understand the system.
+- `$PATH`: Target directory for architecture model and output
+- Project context via `--add-dir`
+
+## Process
+
+1. Read input file(s) to understand the system
+2. Create `$PATH/architecture/` directory
+3. Write `$PATH/architecture/model.c4` with rich modeling
+4. Run: `bunx likec4 export png -o $PATH/output $PATH/architecture/`
+5. List all generated images
 
 ## Modeling Depth
 
@@ -65,13 +77,6 @@ api -> db "SQL" { style { line dashed } }
 legacy -> new "deprecated" { style { color red; line dotted } }
 ```
 
-## Process
-
-1. Read input file
-2. Write `architecture/model.c4` with rich modeling
-3. Run: `npx likec4 export png -o ./output architecture/`
-4. List all generated images
-
 ## Output Format
 
 One sentence describing what the diagrams show.
@@ -79,17 +84,15 @@ One sentence describing what the diagrams show.
 Then list ALL generated images:
 
 ```txt
-model: /absolute/path/to/model.c4
+model: $PATH/architecture/model.c4
 images:
-  /absolute/path/to/output/index.png
-  /absolute/path/to/output/containers.png
-  /absolute/path/to/output/detail.png
+  $PATH/output/index.png
+  $PATH/output/containers.png
   ...
 ```
 
 ## Rules
 
 - One sentence description
-- List every PNG generated in output/
-- Use `ls output/*.png` to find all images
+- List every PNG generated
 - No markdown formatting in output
