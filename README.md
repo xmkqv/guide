@@ -1,55 +1,53 @@
 
-Declarative anti-fragile self-healing reifier.
+Dynamic declarative reifier.
 
-- Self-healing: Deltas behave as stochastic gradient updates.
-- Anti-fragile: Flaws → signals → insights
+Self-healing: The system frames the build, test, and incremental evolution of qualia.
+Anti-fragile: Divergence → signals → improvements.
+
+```text
+∆Design → ∆Qualia → ∆Signal
+   ↑                   ↓
+   └────── ∇Loss ──────┘
+```
+
+- Design: Declarative specification.
+- Qualia: Expressed constructs.
+- Signal: Behavior insight.
 
 ```bash
-guide sync # create if not exists, tests → specs, specs → limns
+guide sync # sync spec.test, log undeclared tests
 guide check # lint, format, typecheck
 ```
 
 ```yaml
 # guide.yaml
 
-rgxlog?: {list[text]} # instrumented logger target function patterns
-design: {list[spec]}
-datasets?: {list[loader]}
+design: {spec}
 ```
 
 # Design
 
-Specs decompose mission into irreducible, orthogonal, necessary, and consequential elements.
+Specs decompose into irreducible, orthogonal, necessary, and consequential elements.
 
 ```sql
 type test (
-    path text, -- qualified path to single programmatic test
+    ref text, -- qualified path to single programmatic test
     result? jsonb
 )
 
 type limn (
-    type text, -- { ...plot-types, architecture }
+    type text, -- { ...plot-types, architecture, ... }
     path text,
     desc text
 )
 
-spec(
+spec (
     key text pk generated always as random_hex(len=3),
-    defn text,
+    defn text, -- declarative, specific, and unambiguous
     test? test,
     limn? limn,
-    specs list[spec],
+    specs? list[spec],
 )
 ```
 
-# Datasets
-
-Optional dataset manifest.
-
-```sql
-loader(
-    ref text,
-    target text,
-    detail jsonb
-)
-```
+Undeclared tests should be pruned.

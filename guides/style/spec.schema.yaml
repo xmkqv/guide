@@ -14,8 +14,8 @@ _meta:
 required:
   source:
     type: string
-    description: Path to source image (relative to style directory)
-    example: "reference.png"
+    description: Path to source image (relative to working directory)
+    example: "01-rain-soaked-neon.jpg"
 
   extracted_at:
     type: datetime
@@ -77,15 +77,15 @@ required:
       temperature:
         type: float
         range: [-1, 1]
-        description: Color warmth (-1=cold, 1=warm)
+        description: Color warmth (-1=cold, 0=neutral, 1=warm)
       weight:
         type: float
-        range: [-1, 1]
-        description: Visual heaviness (-1=light, 1=heavy)
+        range: [0, 1]
+        description: Visual heaviness (0=light, 1=heavy)
       energy:
         type: float
-        range: [-1, 1]
-        description: Dynamic quality (-1=calm, 1=energetic)
+        range: [0, 1]
+        description: Dynamic quality (0=still, 1=kinetic)
 
 # ============================================
 # PRESET FIELDS (Optional, but semantics fixed)

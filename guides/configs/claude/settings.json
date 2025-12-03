@@ -2,19 +2,6 @@
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "cleanupPeriodDays": 90,
   "includeCoAuthoredBy": false,
-  "hooks": {
-    "PostToolUse": [
-      {
-        "matcher": "Write|Edit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "guide check --hook"
-          }
-        ]
-      }
-    ]
-  },
   "permissions": {
     "allow": [
       "Read",
@@ -89,6 +76,19 @@
       "Read(**/.cargo/registry/**)",
       "Read(**/target/debug/**)",
       "Read(**/target/release/**)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "guide check --hook"
+          }
+        ]
+      }
     ]
   },
   "alwaysThinkingEnabled": true

@@ -5,4 +5,4 @@ Typescript guidelines
 |--------------------------------|--------------|----------------------------------------|
 | Entrypoint                     | package.json |                                        |
 | Package Manager                | bun          |                                        |
-| Typechecker, Linter, Formatter | biome        | `ln -s $GUIDES_DIR/configs/biome.json` |
+| Typechecker, Linter, Formatter | biome        | `ln -s $GUIDES/configs/biome.json` |

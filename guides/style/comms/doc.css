@@ -1,0 +1,35 @@
+/**
+ * Doc: US Letter portrait
+ * Stage only. Aesthetics in mood.css.
+ */
+
+:root {
+  --comm-width: 8.5in;
+  --comm-height: 11in;
+  --comm-aspect: 8.5 / 11;
+  --comm-margin: 1in;
+}
+
+@page {
+  size: letter portrait;
+  margin: var(--comm-margin);
+}
+
+body {
+  margin: 0;
+}
+
+@media print {
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+  }
+
+  p, li {
+    orphans: 2;
+    widows: 2;
+  }
+
+  table, figure, blockquote, pre {
+    page-break-inside: avoid;
+  }
+}

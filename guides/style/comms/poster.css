@@ -1,0 +1,23 @@
+/**
+ * Poster: 1080×1920 portrait
+ * Stage only. Aesthetics in mood.css.
+ */
+
+:root {
+  --comm-width: 1080px;
+  --comm-height: 1920px;
+  --comm-aspect: 9 / 16;
+}
+
+@page {
+  size: 1080px 1920px;
+  margin: 0;
+}
+
+body {
+  margin: 0;
+  inline-size: var(--comm-width);
+  block-size: var(--comm-height);
+  position: relative;
+  overflow: hidden;
+}

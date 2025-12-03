@@ -1,0 +1,31 @@
+/**
+ * Deck: 1920×1080 landscape
+ * Stage only. Aesthetics in mood.css.
+ */
+
+:root {
+  --comm-width: 1920px;
+  --comm-height: 1080px;
+  --comm-aspect: 16 / 9;
+}
+
+@page {
+  size: 1920px 1080px;
+  margin: 0;
+}
+
+body {
+  margin: 0;
+}
+
+section {
+  inline-size: var(--comm-width);
+  block-size: var(--comm-height);
+  position: relative;
+  overflow: hidden;
+  page-break-after: always;
+}
+
+section:last-of-type {
+  page-break-after: avoid;
+}

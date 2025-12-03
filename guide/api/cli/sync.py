@@ -1,29 +1,35 @@
-import asyncio
 from dataclasses import dataclass
+
+from logbot import log
 
 from guide.model import Guide
 
 
 @dataclass(frozen=True)
 class Sync:
-    tests: bool = False
-    limns: bool = False
-    report: bool = False
+    pass
 
 
-async def _run_sync(cmd: Sync):
+@dataclass(frozen=True)
+class SyncResult:
+    declared: set[str]
+    discovered: set[str]
+
+    @property
+    def undeclared(self) -> set[str]:
+        return self.discovered - self.declared
+
+
+def run(cmd: Sync) -> SyncResult:
     guide = Guide.touch()
+    guide.load_test_results_()
 
-    # tests + limns - consume async generators
-    specs = guide.design.flat()
-    for spec in specs:
-        async for _ in spec.sync(tests=cmd.tests, limns=cmd.limns):
-            pass
+    declared = {spec.test.ref for spec in guide.design.flat() if spec.test}
+    discovered = set(guide.lang.discover_tests(guide.dir))
 
-    # report - consume async generator
-    async for _ in guide.design.sync(report=cmd.report):
-        pass
+    result = SyncResult(declared=declared, discovered=discovered)
 
+    for ref in sorted(result.undeclared):
+        log.warning(f"Undeclared test: {ref}")
 
-def run(cmd: Sync):
-    asyncio.run(_run_sync(cmd))
+    return result

@@ -1,98 +1,62 @@
 ---
-name: gen-diagram
+name: gen-limn
 description: Generate architecture diagrams using LikeC4
-tools: Bash, Read, Edit, Write
-permissionMode: acceptEdits
 argument-hint: [path]
 ---
 
 PATH=$ARGUMENTS[0]
+LIMN_=$RESULTS_/limn
 
-# gen-diagram
+# Output
 
-Generate LikeC4 architecture diagrams from source.
+```text
+$LIMN_/
+  model.c4    # LikeC4 model
+  *.png       # rendered views
+```
 
-## Input
+# Process
 
-- `$PATH`: Target directory for architecture model and output
-- Project context via `--add-dir`
+1. Read $PATH to understand the system
+2. Write $LIMN_/model.c4
+3. Run: `bunx likec4 export png -o $LIMN_ $LIMN_/`
+4. List generated images
 
-## Process
-
-1. Read input file(s) to understand the system
-2. Create `$PATH/architecture/` directory
-3. Write `$PATH/architecture/model.c4` with rich modeling
-4. Run: `bunx likec4 export png -o $PATH/output $PATH/architecture/`
-5. List all generated images
-
-## Modeling Depth
+# Modeling
 
 Capture full system complexity:
 
-- All actors and external systems
-- Every container and component mentioned
-- All relationships and data flows
-- Technology annotations where specified
+- Actors and external systems
+- Containers and components
+- Relationships and data flows
+- Technology annotations
 - Multiple views at different abstraction levels
 - Tags for status (deprecated, external, planned)
 
-## LikeC4 Techniques
-
-### Element Shapes
+# LikeC4
 
 ```likec4
 element actor { style { shape person } }
-element system { style { shape rectangle } }
 element database { style { shape storage } }
 element queue { style { shape queue } }
-element browser { style { shape browser } }
-element mobile { style { shape mobile } }
-```
 
-### Colors and Themes
-
-```likec4
 element external { style { color gray } }
-element core { style { color blue } }
 element deprecated { style { color amber; opacity 50% } }
-```
 
-### Rich Views
-
-Create multiple views for different audiences:
-
-```likec4
 views {
   view index { title "System Overview"; include * }
-  view containers of system { title "Containers"; include system.* }
-  view detail of component { title "Component Detail"; include component, component.* }
+  view containers of system { include system.* }
 }
-```
 
-### Relationship Styles
-
-```likec4
 user -> api "REST" { style { color green } }
 api -> db "SQL" { style { line dashed } }
-legacy -> new "deprecated" { style { color red; line dotted } }
 ```
 
-## Output Format
+# Output
 
-One sentence describing what the diagrams show.
-
-Then list ALL generated images:
-
-```txt
-model: $PATH/architecture/model.c4
-images:
-  $PATH/output/index.png
-  $PATH/output/containers.png
-  ...
+```text
+$LIMN_/model.c4
+$LIMN_/index.png
+$LIMN_/containers.png
+...
 ```
-
-## Rules
-
-- One sentence description
-- List every PNG generated
-- No markdown formatting in output

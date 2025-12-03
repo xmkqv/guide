@@ -6,6 +6,16 @@ Principles for reasoning about software. Adapt to context. Apply with judgment.
 
 Clean Code (Martin). Pragmatic Programmer (Hunt/Thomas). A Philosophy of Software Design (Ousterhout). Domain-Driven Design (Evans). Functional Core, Imperative Shell (Bernhardt).
 
+- Referential transparency: pure expressions that can be substituted for their values
+- Algebraic structure: operations that compose via well-defined laws (associativity, identity)
+- Effect isolation: separating "what to compute" from "how to execute"
+- Point-free style: data flows through pipelines without intermediate bindings
+
+**Robust, Typed, Professional, Production-ready, Modular, Clean Code (by Robert C. Martin), Practical Functional Programming, SOLID, DRY, KISS, YAGNI**
+
+- Naming
+  - Functions: `{verb}{sep}{noun}` (e.g., `get_user`, `set_value`)
+
 ## Orientation
 
 Complexity is the adversary. Structure emerges from problem shape, not template conformance.

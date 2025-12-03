@@ -92,7 +92,9 @@
   "material-icon-theme.activeIconPack": "none",
   /*** FILES & SEARCH ***/
   "files.exclude": {
-    "**/__pycache__": true
+    "**/__pycache__": true,
+    "**/.pytest_cache": true,
+    "**/*.egg-info": true
   },
   "search.exclude": {
     "**/node_modules/**": true,

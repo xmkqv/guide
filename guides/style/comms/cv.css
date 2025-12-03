@@ -1,0 +1,26 @@
+/**
+ * CV: US Letter portrait, tight
+ * Stage only. Aesthetics in mood.css.
+ */
+
+:root {
+  --comm-width: 8.5in;
+  --comm-height: 11in;
+  --comm-aspect: 8.5 / 11;
+  --comm-margin: 0.5in 0.6in;
+}
+
+@page {
+  size: letter portrait;
+  margin: var(--comm-margin);
+}
+
+body {
+  margin: 0;
+}
+
+@media print {
+  section, article {
+    page-break-inside: avoid;
+  }
+}

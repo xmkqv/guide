@@ -407,9 +407,6 @@ def run(cmd: Check) -> None:
             return
 
         is_edit = hook_data.tool_name == "Edit"
-        content = (
-            hook_data.tool_input.new_string if is_edit else hook_data.tool_input.content
-        )
         full_content = "" if is_edit else hook_data.tool_input.content
 
         with Status("Validating...", console=console):

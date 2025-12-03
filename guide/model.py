@@ -1,20 +1,17 @@
+import warnings
 from pathlib import Path
-from typing import Any, Self
+from typing import Self
 
 import yaml
 from pydantic import BaseModel, Field
 
 from guide import lang, paths
-from guide.datasets import Datasets
 from guide.design import Design
-from guide.utils import touch_dir
 
 
 class Guide(BaseModel):
     dir: Path = Field(exclude=True)
-    rgxlog: list[str] = Field(default_factory=list[str])
     design: Design = Field(default_factory=Design)
-    datasets: Datasets[Any] | None = None
 
     @property
     def lang(self):
@@ -25,17 +22,16 @@ class Guide(BaseModel):
         else:
             return lang.md
 
-    @property
-    def results_dir(self):
-        return self.dir / paths.RESULTS_DIR_NAME
+    def load_test_results_(self):
+        specs = self.design.flat()
+        spec_test_map = {spec.test.ref: spec.test for spec in specs if spec.test}
 
-    @property
-    def results_path(self):
-        return self.results_dir / self.lang.results_file_name
-
-    @property
-    def datasets_dir(self):
-        return self.dir / paths.DATASETS_DIR_NAME
+        for r in self.lang.load_test_results(self.dir):
+            spec_test = spec_test_map.get(r.ref)
+            if spec_test:
+                spec_test.result = r
+            else:
+                warnings.warn(f"Orphan test result: {r.ref}", stacklevel=2)
 
     @classmethod
     def find_nearest(cls) -> Self | None:
@@ -49,7 +45,10 @@ class Guide(BaseModel):
     @classmethod
     def get_nearest(cls) -> Self:
         self = cls.find_nearest()
-        assert self is not None, f"No {paths.GUIDE_YAML_NAME} found"
+        if self is None:
+            raise FileNotFoundError(
+                f"No {paths.GUIDE_YAML_NAME} found in directory hierarchy"
+            )
         return self
 
     @classmethod
@@ -72,9 +71,5 @@ class Guide(BaseModel):
             guide = Guide(dir=Path.cwd())
             guide.dump()
 
-        touch_dir(guide.results_dir)
-        touch_dir(guide.datasets_dir)
-
         guide.lang.install_claude(guide.dir)
-
         return guide

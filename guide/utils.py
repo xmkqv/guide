@@ -3,6 +3,7 @@ import os
 import re
 import sys
 from collections.abc import Callable, Sequence
+from enum import Enum
 from importlib.abc import MetaPathFinder
 from importlib.machinery import ModuleSpec
 from pathlib import Path
@@ -26,12 +27,19 @@ def wrap_module_funcs[F: Callable[..., object]](
             setattr(mod, name, wrapper(obj))
 
 
+_registered_patterns: set[tuple[str, ...]] = set()
+
+
 def mega_wrap[F: Callable[..., object]](
     patterns: list[str], wrapper: Callable[[F], F]
 ) -> None:
     """Install import hook that wraps functions in matching modules."""
     if not patterns:
         return
+    patterns_key = tuple(sorted(patterns))
+    if patterns_key in _registered_patterns:
+        return
+    _registered_patterns.add(patterns_key)
     compiled = [re.compile(p) for p in patterns]
 
     class Finder(MetaPathFinder):
@@ -69,7 +77,8 @@ def get_func(ref: str) -> FunctionType:
     module_name, func_name = ref.rsplit(".", 1)
     module = __import__(module_name, fromlist=[func_name])
     func = getattr(module, func_name)
-    assert inspect.isfunction(func)
+    if not inspect.isfunction(func):
+        raise TypeError(f"'{ref}' is {type(func).__name__}, not a function")
     return func
 
 
@@ -97,18 +106,13 @@ def inject(target: Path, *chunks: str):
     target.write_text(content)
 
 
-class AutoDir:
-    base: Path
+class AutoDir(Enum):
+    _base_: Path
 
-    def __init_subclass__(cls, base: Path, **kwargs: dict[str, object]) -> None:
+    def __init_subclass__(cls, /, dir: Path | str, **kwargs: object) -> None:
+        cls._base_ = Path(dir).resolve()
         super().__init_subclass__(**kwargs)
 
-        cls.base = base.resolve()
-        for k, v in vars(cls).items():
-            if k.startswith("_"):
-                continue
-            if not isinstance(v, str):
-                continue
-            patched_path = (cls.base / v).resolve()
-            assert patched_path.exists(), f"Path does not exist: {patched_path}"
-            setattr(cls, k, patched_path)
+    @property
+    def path(self) -> Path:
+        return self._base_ / self.value

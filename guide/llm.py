@@ -7,7 +7,11 @@ from typing import Any, Literal
 from pydantic import BaseModel, create_model
 
 
-async def aask(*content: str, model: Literal["opus", "sonnet"] = "opus") -> str:
+async def aask(
+    *content: str,
+    model: Literal["opus", "sonnet"] = "opus",
+    timeout_seconds: float = 300.0,
+) -> str:
     cmd = (
         "claude",
         "--print",
@@ -21,7 +25,15 @@ async def aask(*content: str, model: Literal["opus", "sonnet"] = "opus") -> str:
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE,
     )
-    stdout, stderr = await process.communicate(input="\n".join(content).encode())
+    try:
+        async with asyncio.timeout(timeout_seconds):
+            stdout, stderr = await process.communicate(
+                input="\n".join(content).encode()
+            )
+    except TimeoutError:
+        process.kill()
+        await process.wait()
+        raise TimeoutError(f"LLM call timed out after {timeout_seconds}s") from None
     stdout = stdout.decode(errors="replace")
     stderr = stderr.decode(errors="replace") if stderr else None
 

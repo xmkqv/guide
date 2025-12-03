@@ -6,9 +6,9 @@ Python guidelines inspired by
 
 | Aspect      | Tool     | Config?                                        |
 |-------------|----------|------------------------------------------------|
-| Linter      | Ruff     | extend $GUIDES_DIR/configs/ruff.toml           |
-| Formatter   | Ruff     | extend $GUIDES_DIR/configs/ruff.toml           |
-| Typechecker | pyright  | `ln -s $GUIDES_DIR/configs/pyrightconfig.json` |
+| Linter      | Ruff     | extend $GUIDES/configs/ruff.toml           |
+| Formatter   | Ruff     | extend $GUIDES/configs/ruff.toml           |
+| Typechecker | pyright  | `ln -s $GUIDES/configs/pyrightconfig.json` |
 | Entrypoint  | justfile |                                                |
 
 # Domain Types

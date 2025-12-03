@@ -1,2 +1,0 @@
-- [ ] sync claude.md
-  - @/... preferences
