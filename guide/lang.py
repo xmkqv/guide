@@ -27,16 +27,21 @@ def discover_pytest_tests(base_dir: Path) -> Iterator[str]:
             for node in ast.walk(tree):
                 if isinstance(node, ast.FunctionDef) and node.name.startswith("test_"):
                     if not any(
-                        isinstance(p, ast.ClassDef) for p in ast.walk(tree) if node in getattr(p, "body", [])
+                        isinstance(p, ast.ClassDef)
+                        for p in ast.walk(tree)
+                        if node in getattr(p, "body", [])
                     ):
                         yield f"{rel_path}::{node.name}"
 
                 elif isinstance(node, ast.ClassDef) and node.name.startswith("Test"):
                     for item in node.body:
-                        if isinstance(item, ast.FunctionDef) and item.name.startswith("test_"):
+                        if isinstance(item, ast.FunctionDef) and item.name.startswith(
+                            "test_"
+                        ):
                             yield f"{rel_path}::{node.name}::{item.name}"
 
-CLAUDE_MD_NAME = "claude.md"
+
+CLAUDE_MD_NAME = "CLAUDE.md"
 
 
 class Lang(BaseModel):

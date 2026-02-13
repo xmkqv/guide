@@ -85,7 +85,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "guide check --hook"
+            "command": "\"$CLAUDE_PROJECT_DIR\"/guides/configs/claude/hooks/on-change.sh"
           }
         ]
       }

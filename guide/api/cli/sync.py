@@ -1,6 +1,7 @@
+import logging
 from dataclasses import dataclass
 
-from logbot import log
+log = logging.getLogger(__name__)
 
 from guide.model import Guide
 

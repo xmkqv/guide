@@ -39,13 +39,16 @@ select = [
     "LOG",      # flake8-logging
     "Q",        # flake8-quotes
 ]
+
 ignore = [
     "COM812",   # trailing-comma-missing (formatter conflict)
     "ISC001",   # single-line-implicit-concatenation (formatter conflict)
     "E501",     # line-too-long
     "C408",     # disallows dict(...)
     "TC001",    # allow non-module level imports
+    "TC002",    # allow third-party imports outside TYPE_CHECKING blocks
     "TC003",    # Type checking imports not required for type imports only
+    "B905",      # Stop having beef with zip
 ]
 
 [format]

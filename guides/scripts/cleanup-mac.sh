@@ -1,11 +1,10 @@
 #!/bin/bash
 set -euo pipefail
 
-# Mac Cleanup Script - Comprehensive Edition
-# Intelligently cleans caches, logs, temp files, and development artifacts
-# Safe to run regularly - only touches regenerable caches and temp files
+# Mac Cleanup Script
+# Cleans caches, logs, temp files, and development artifacts
+# Safe to run regularly - only touches regenerable caches
 
-# Colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -14,78 +13,80 @@ CYAN='\033[0;36m'
 NC='\033[0m'
 
 TOTAL_SAVED=0
+DRY_RUN=false
 
-# Output functions
+[[ "${1:-}" == "-n" || "${1:-}" == "--dry-run" ]] && DRY_RUN=true
+
 print_section() { echo -e "\n${BLUE}==>${NC} ${1}"; }
 print_success() { echo -e "${GREEN}✓${NC} ${1}"; }
 print_warning() { echo -e "${YELLOW}!${NC} ${1}"; }
-print_info() { echo -e "${CYAN}ℹ${NC} ${1}"; }
 
-# Get size in KB
 get_size() {
-    if [ -e "$1" ]; then
-        du -sk "$1" 2>/dev/null | cut -f1 || echo "0"
-    else
-        echo "0"
-    fi
+    [[ -e "$1" ]] && du -sk "$1" 2>/dev/null | cut -f1 || echo "0"
 }
 
-# Format size for display
 format_size() {
     local size=$1
-    if [ $size -ge 1048576 ]; then
-        local gb=$((size * 100 / 1048576))
-        echo "$((gb / 100)).$((gb % 100)) GB"
-    elif [ $size -ge 1024 ]; then
-        local mb=$((size * 100 / 1024))
-        echo "$((mb / 100)).$((mb % 100)) MB"
+    if [[ $size -ge 1048576 ]]; then
+        echo "$((size / 1048576)).$((size % 1048576 * 100 / 1048576)) GB"
+    elif [[ $size -ge 1024 ]]; then
+        echo "$((size / 1024)).$((size % 1024 * 100 / 1024)) MB"
     else
         echo "${size} KB"
     fi
 }
 
-# Clean directory - only if it exists and has meaningful size
+is_running() {
+    pgrep -xq "$1" 2>/dev/null
+}
+
 clean_dir() {
     local path=$1
     local desc=$2
-    local min_kb=${3:-1024}  # Skip if less than 1MB by default
+    local min_kb=${3:-1024}
 
-    [ ! -e "$path" ] && return
+    [[ ! -e "$path" ]] && return 0
+    [[ -z "$path" || "$path" == "/" || "$path" == "$HOME" ]] && return 0
 
-    local before=$(get_size "$path")
-    [ -z "$before" ] && before=0
-    [ $before -lt $min_kb ] && return
+    local before
+    before=$(get_size "$path")
+    [[ $before -lt $min_kb ]] && return 0
 
-    # Safety check: ensure path is not empty, root, or home
-    if [[ -z "$path" || "$path" == "/" || "$path" == "$HOME" ]]; then
-        return
+    if $DRY_RUN; then
+        print_success "[DRY] $desc: $(format_size "$before")"
+        TOTAL_SAVED=$((TOTAL_SAVED + before))
+        return 0
     fi
 
-    if [ -d "$path" ]; then
-        # Use find for safer deletion
+    if [[ -d "$path" ]]; then
         find "$path" -mindepth 1 -delete 2>/dev/null || true
-    elif [ -f "$path" ]; then
+    else
         rm -f "$path" 2>/dev/null || true
     fi
 
-    local after=$(get_size "$path")
+    local after
+    after=$(get_size "$path")
     local saved=$((before - after))
     TOTAL_SAVED=$((TOTAL_SAVED + saved))
-
-    [ $saved -gt 0 ] && print_success "$desc: $(format_size $saved)"
+    [[ $saved -gt 0 ]] && print_success "$desc: $(format_size $saved)"
 }
 
-# Clean with command
 clean_cmd() {
     local cmd=$1
     local desc=$2
+
+    if $DRY_RUN; then
+        print_success "[DRY] $desc"
+        return 0
+    fi
+
     if eval "$cmd" 2>/dev/null; then
         print_success "$desc"
     fi
 }
 
 echo "======================================"
-echo "  Mac Cleanup - Running..."
+$DRY_RUN && echo "  Mac Cleanup - DRY RUN" || echo "  Mac Cleanup - Running..."
 echo "======================================"
 
 # ==================================================
@@ -93,166 +94,242 @@ echo "======================================"
 # ==================================================
 print_section "System Caches & Logs"
 
-# User caches - only clean large ones
 for cache in "$HOME/Library/Caches"/*; do
-    [ -d "$cache" ] && clean_dir "$cache" "$(basename "$cache")" 102400  # >100MB
+    [[ -d "$cache" ]] && clean_dir "$cache" "$(basename "$cache")" 51200
 done
 
 clean_dir "$HOME/Library/Logs" "System logs"
 clean_dir "$HOME/Library/Logs/DiagnosticReports" "Crash reports"
 clean_dir "$HOME/Library/Application Support/CrashReporter" "Crash reporter"
 
-# Temp files older than 3 days
-if [ -d "/tmp" ]; then
+if [[ -d "/tmp" ]]; then
     before=$(get_size "/tmp")
-    find /tmp -type f -atime +3 -delete 2>/dev/null || true
+    if ! $DRY_RUN; then
+        find /tmp -type f -atime +3 -delete 2>/dev/null || true
+    fi
     after=$(get_size "/tmp")
     saved=$((before - after))
-    [ $saved -gt 0 ] && { TOTAL_SAVED=$((TOTAL_SAVED + saved)); print_success "Temp files: $(format_size $saved)"; }
+    if [[ $saved -gt 0 ]]; then
+        TOTAL_SAVED=$((TOTAL_SAVED + saved))
+        print_success "Temp files: $(format_size $saved)"
+    fi
 fi
 
-# Trash
 clean_dir "$HOME/.Trash" "Trash" 0
+
+# ==================================================
+# XDG CACHES
+# ==================================================
+print_section "XDG Caches"
+
+# uv (Python package manager)
+clean_dir "$HOME/.cache/uv/archive-v0" "uv package archive"
+clean_dir "$HOME/.cache/uv/sdists-v9" "uv sdists"
+clean_dir "$HOME/.cache/uv/simple-v16" "uv simple cache"
+clean_dir "$HOME/.cache/uv/simple-v17" "uv simple cache v17"
+clean_dir "$HOME/.cache/uv/wheels-v5" "uv wheels"
+
+# bun
+clean_dir "$HOME/.bun/install/cache" "bun install cache"
+
+# Browser automation
+clean_dir "$HOME/.cache/puppeteer" "Puppeteer browsers"
+clean_dir "$HOME/.cache/ms-playwright" "Playwright browsers"
+
+# Python tools
+clean_dir "$HOME/.cache/pre-commit" "pre-commit"
+clean_dir "$HOME/.cache/torch" "PyTorch cache"
+
+# Node
+clean_dir "$HOME/.cache/node" "Node cache"
+clean_dir "$HOME/Library/Caches/node-gyp" "node-gyp"
+
+# ==================================================
+# ML CACHES (Warning Only)
+# ==================================================
+print_section "ML Caches"
+
+if [[ -d "$HOME/.cache/huggingface" ]]; then
+    hf_size=$(get_size "$HOME/.cache/huggingface")
+    if [[ $hf_size -gt 5242880 ]]; then
+        print_warning "Huggingface: $(format_size "$hf_size") - run 'huggingface-cli delete-cache'"
+    fi
+fi
+
+if [[ -d "$HOME/.ollama/models" ]]; then
+    ollama_size=$(get_size "$HOME/.ollama/models")
+    if [[ $ollama_size -gt 5242880 ]]; then
+        print_warning "Ollama models: $(format_size "$ollama_size") - run 'ollama rm <model>'"
+    fi
+fi
 
 # ==================================================
 # PACKAGE MANAGERS
 # ==================================================
 print_section "Package Managers"
 
-# Homebrew (required)
-if command -v brew &> /dev/null; then
+if command -v brew &>/dev/null; then
     clean_cmd "brew cleanup -s && brew autoremove" "Homebrew"
-    clean_dir "$(brew --cache)" "Homebrew cache"
+    brew_cache=$(brew --cache 2>/dev/null)
+    [[ -n "$brew_cache" ]] && clean_dir "$brew_cache" "Homebrew cache"
 fi
 
 # npm
-command -v npm &> /dev/null && clean_cmd "npm cache clean --force" "npm"
+clean_dir "$HOME/.npm/_cacache" "npm cache"
+clean_dir "$HOME/.npm/_logs" "npm logs"
 
 # yarn
-if command -v yarn &> /dev/null; then
-    clean_dir "$(yarn cache dir 2>/dev/null)" "yarn"
+if command -v yarn &>/dev/null; then
+    yarn_cache=$(yarn cache dir 2>/dev/null)
+    [[ -n "$yarn_cache" ]] && clean_dir "$yarn_cache" "yarn cache"
 fi
 
 # pnpm
-command -v pnpm &> /dev/null && clean_cmd "pnpm store prune" "pnpm"
+command -v pnpm &>/dev/null && clean_cmd "pnpm store prune" "pnpm"
 
 # pip
-command -v pip3 &> /dev/null && clean_cmd "pip3 cache purge" "pip"
+command -v pip3 &>/dev/null && clean_cmd "pip3 cache purge" "pip"
 
-# Cargo (Rust)
-if [ -d "$HOME/.cargo" ]; then
-    clean_dir "$HOME/.cargo/registry/cache" "Cargo cache"
-    clean_dir "$HOME/.cargo/git/checkouts" "Cargo checkouts"
-fi
+# Cargo
+clean_dir "$HOME/.cargo/registry/cache" "Cargo registry cache"
+clean_dir "$HOME/.cargo/git/checkouts" "Cargo git checkouts"
 
 # Go
-command -v go &> /dev/null && clean_cmd "go clean -cache -modcache -testcache" "Go"
+command -v go &>/dev/null && clean_cmd "go clean -cache -modcache -testcache" "Go"
 
-# Ruby gems
-command -v gem &> /dev/null && clean_cmd "gem cleanup" "Ruby gems"
+# Ruby
+command -v gem &>/dev/null && clean_cmd "gem cleanup" "Ruby gems"
 
-# Composer (PHP)
-command -v composer &> /dev/null && clean_cmd "composer clear-cache" "Composer"
+# Composer
+command -v composer &>/dev/null && clean_cmd "composer clear-cache" "Composer"
 
 # ==================================================
 # DEVELOPMENT TOOLS
 # ==================================================
 print_section "Development Tools"
 
-# Docker (less aggressive - keeps tagged images)
-if command -v docker &> /dev/null && docker info &> /dev/null 2>&1; then
-    clean_cmd "docker system prune --volumes -f" "Docker"
+# Docker (preserve named volumes)
+if command -v docker &>/dev/null && docker info &>/dev/null 2>&1; then
+    clean_cmd "docker system prune -f" "Docker system"
+    clean_cmd "docker builder prune -f" "Docker builder"
 fi
 
 # Xcode
 clean_dir "$HOME/Library/Developer/Xcode/DerivedData" "Xcode DerivedData"
-clean_dir "$HOME/Library/Developer/Xcode/Archives" "Xcode Archives" 1048576  # >1GB
+clean_dir "$HOME/Library/Developer/Xcode/Archives" "Xcode Archives" 1048576
 clean_dir "$HOME/Library/Caches/CocoaPods" "CocoaPods"
 
-# iOS Simulators - delete unavailable
-if command -v xcrun &> /dev/null; then
-    clean_cmd "xcrun simctl delete unavailable" "Old simulators"
-fi
+# iOS Simulators
+command -v xcrun &>/dev/null && clean_cmd "xcrun simctl delete unavailable" "Old simulators"
 
 # Old iOS backups (>30 days)
-if [ -d "$HOME/Library/Application Support/MobileSync/Backup" ]; then
+if [[ -d "$HOME/Library/Application Support/MobileSync/Backup" ]]; then
     before=$(get_size "$HOME/Library/Application Support/MobileSync/Backup")
-    find "$HOME/Library/Application Support/MobileSync/Backup" -type d -mindepth 1 -maxdepth 1 -mtime +30 -exec rm -rf {} \; 2>/dev/null || true
+    if ! $DRY_RUN; then
+        find "$HOME/Library/Application Support/MobileSync/Backup" -type d -mindepth 1 -maxdepth 1 -mtime +30 -exec rm -rf {} \; 2>/dev/null || true
+    fi
     after=$(get_size "$HOME/Library/Application Support/MobileSync/Backup")
     saved=$((before - after))
-    [ $saved -gt 0 ] && { TOTAL_SAVED=$((TOTAL_SAVED + saved)); print_success "iOS backups: $(format_size $saved)"; }
+    if [[ $saved -gt 0 ]]; then
+        TOTAL_SAVED=$((TOTAL_SAVED + saved))
+        print_success "iOS backups: $(format_size $saved)"
+    fi
 fi
 
-# iOS Software Updates
 clean_dir "$HOME/Library/iTunes/iPhone Software Updates" "iOS updates"
 clean_dir "$HOME/Library/iTunes/iPad Software Updates" "iPad updates"
 
 # Gradle & Maven
-clean_dir "$HOME/.gradle/caches" "Gradle"
-clean_dir "$HOME/.m2/repository" "Maven" 512000  # >500MB
+clean_dir "$HOME/.gradle/caches" "Gradle caches"
+clean_dir "$HOME/.m2/repository" "Maven" 524288
 
 # ==================================================
-# BROWSERS
+# EDITORS
+# ==================================================
+print_section "Editors"
+
+# VS Code
+clean_dir "$HOME/Library/Application Support/Code/CachedData" "VS Code cached data"
+clean_dir "$HOME/Library/Application Support/Code/CachedExtensionVSIXs" "VS Code extension cache"
+clean_dir "$HOME/Library/Application Support/Code/logs" "VS Code logs"
+clean_dir "$HOME/Library/Application Support/Code/User/workspaceStorage" "VS Code workspace storage" 102400
+
+# Cursor
+clean_dir "$HOME/Library/Application Support/Cursor/CachedData" "Cursor cached data"
+clean_dir "$HOME/Library/Application Support/Cursor/CachedExtensionVSIXs" "Cursor extension cache"
+clean_dir "$HOME/Library/Application Support/Cursor/logs" "Cursor logs"
+
+# Claude CLI
+if [[ -d "$HOME/.local/share/claude" ]]; then
+    claude_size=$(get_size "$HOME/.local/share/claude")
+    if [[ $claude_size -gt 1048576 ]]; then
+        print_warning "Claude CLI: $(format_size "$claude_size") - run 'claude conversation rm' to prune"
+    fi
+fi
+
+# ==================================================
+# BROWSERS (Skip if running)
 # ==================================================
 print_section "Browsers"
 
-clean_dir "$HOME/Library/Caches/com.apple.Safari" "Safari"
-clean_dir "$HOME/Library/Caches/Google/Chrome" "Chrome"
-clean_dir "$HOME/Library/Caches/Firefox" "Firefox"
-clean_dir "$HOME/Library/Caches/Microsoft Edge" "Edge"
-clean_dir "$HOME/Library/Caches/BraveSoftware/Brave-Browser" "Brave"
-clean_dir "$HOME/Library/Caches/com.operasoftware.Opera" "Opera"
+if is_running "Google Chrome"; then
+    print_warning "Chrome running - skipped"
+else
+    clean_dir "$HOME/Library/Caches/Google/Chrome" "Chrome cache"
+    clean_dir "$HOME/Library/Application Support/Google/Chrome/Default/Service Worker" "Chrome workers"
+fi
 
-# Browser service workers
-clean_dir "$HOME/Library/Application Support/Google/Chrome/Default/Service Worker" "Chrome workers"
+if is_running "Safari"; then
+    print_warning "Safari running - skipped"
+else
+    clean_dir "$HOME/Library/Caches/com.apple.Safari" "Safari cache"
+fi
+
+if is_running "firefox"; then
+    print_warning "Firefox running - skipped"
+else
+    clean_dir "$HOME/Library/Caches/Firefox" "Firefox cache"
+fi
+
+clean_dir "$HOME/Library/Caches/Microsoft Edge" "Edge cache"
+clean_dir "$HOME/Library/Caches/BraveSoftware/Brave-Browser" "Brave cache"
+clean_dir "$HOME/Library/Caches/com.operasoftware.Opera" "Opera cache"
+clean_dir "$HOME/Library/Caches/company.thebrowser.Browser" "Arc cache"
 
 # ==================================================
 # APPLICATIONS
 # ==================================================
 print_section "Applications"
 
-# Mail
-clean_dir "$HOME/Library/Caches/com.apple.mail" "Mail"
-for envelope in "$HOME/Library/Mail/V*/MailData/Envelope Index"*; do
-    [ -e "$envelope" ] && rm -rf "$envelope" 2>/dev/null || true
-done
+clean_dir "$HOME/Library/Caches/com.apple.mail" "Mail cache"
 
-# Adobe (notorious space hog)
-clean_dir "$HOME/Library/Application Support/Adobe/Common/Media Cache Files" "Adobe media"
-clean_dir "$HOME/Library/Caches/Adobe" "Adobe"
+# Adobe
+clean_dir "$HOME/Library/Application Support/Adobe/Common/Media Cache Files" "Adobe media cache"
+clean_dir "$HOME/Library/Caches/Adobe" "Adobe cache"
 
-# Communication apps
-clean_dir "$HOME/Library/Application Support/Slack/Cache" "Slack"
-clean_dir "$HOME/Library/Application Support/Slack/Service Worker" "Slack workers"
-clean_dir "$HOME/Library/Application Support/discord/Cache" "Discord"
-clean_dir "$HOME/Library/Caches/com.spotify.client" "Spotify"
+# Communication
+if ! is_running "Slack"; then
+    clean_dir "$HOME/Library/Application Support/Slack/Cache" "Slack cache"
+    clean_dir "$HOME/Library/Application Support/Slack/Service Worker" "Slack workers"
+fi
 
-# System caches
-clean_dir "$HOME/Library/Caches/com.apple.QuickLookDaemon" "QuickLook"
-clean_dir "$HOME/Library/Application Support/com.apple.documentVersions" "Document versions"
+clean_dir "$HOME/Library/Application Support/discord/Cache" "Discord cache"
+clean_dir "$HOME/Library/Caches/com.spotify.client" "Spotify cache"
+clean_dir "$HOME/Library/Caches/us.zoom.xos" "Zoom cache"
+
+# System
+clean_dir "$HOME/Library/Caches/com.apple.QuickLookDaemon" "QuickLook cache"
 
 # ==================================================
 # SYSTEM MAINTENANCE
 # ==================================================
 print_section "System Maintenance"
 
-# Font cache
-clean_cmd "atsutil databases -removeUser" "Font cache"
-
-# DNS cache
-clean_cmd "dscacheutil -flushcache && killall -HUP mDNSResponder" "DNS cache"
-
-# .DS_Store files
-find ~ -name ".DS_Store" -delete 2>/dev/null || true
-print_success "Removed .DS_Store files"
-
-# Purge memory (requires sudo in some macOS versions)
-if command -v purge &> /dev/null; then
-    if purge 2>/dev/null; then
-        print_success "Memory purge"
-    else
-        print_warning "Memory purge (skipped - requires elevated privileges)"
-    fi
+if ! $DRY_RUN; then
+    clean_cmd "atsutil databases -removeUser" "Font cache"
+    clean_cmd "dscacheutil -flushcache && killall -HUP mDNSResponder" "DNS cache"
+    find ~ -name ".DS_Store" -delete 2>/dev/null || true
+    print_success "Removed .DS_Store files"
 fi
 
 # ==================================================
@@ -260,12 +337,12 @@ fi
 # ==================================================
 echo ""
 echo "======================================"
-print_success "Cleanup Complete!"
+$DRY_RUN && print_success "Dry Run Complete!" || print_success "Cleanup Complete!"
 echo "======================================"
 echo -e "Space freed: ${GREEN}$(format_size $TOTAL_SAVED)${NC}"
 echo ""
-print_info "Next steps:"
-echo "  • brew install ncdu && ncdu ~  ${CYAN}# Visual disk analyzer${NC}"
-echo "  • du -sh ~/* | sort -hr | head -20  ${CYAN}# Find large dirs${NC}"
-echo "  • System Settings → Storage  ${CYAN}# macOS storage manager${NC}"
+print_warning "Manual review recommended:"
+echo -e "  huggingface-cli delete-cache   ${CYAN}# ML models${NC}"
+echo -e "  ollama rm <model>              ${CYAN}# LLM models${NC}"
+echo -e "  docker volume prune            ${CYAN}# Unused volumes${NC}"
 echo ""

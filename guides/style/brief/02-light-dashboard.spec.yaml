@@ -1,0 +1,37 @@
+source: "02-light-dashboard.jpg"
+extracted_at: "2025-12-05T09:15:00Z"
+
+palette:
+  dominant:
+    - { hex: "#ffffff", weight: 0.45, name: "surface" }
+    - { hex: "#1a2634", weight: 0.25, name: "navy" }
+    - { hex: "#8b6b4f", weight: 0.15, name: "walnut" }
+  accent:
+    - { hex: "#2db5a3", weight: 0.10, name: "teal" }
+    - { hex: "#5ac4b5", weight: 0.05, name: "seafoam" }
+
+composition:
+  balance: 0.0
+  density: 0.7
+  focal_points: [[0.4, 0.4, 0.8], [0.6, 0.6, 0.6]]
+
+texture:
+  grain: 0.05
+  organic: 0.3
+
+affect:
+  temperature: 0.3
+  weight: 0.4
+  energy: 0.5
+
+influences:
+  - "modern analytics dashboards"
+  - "clean data visualization"
+  - "McKinsey presentation style"
+
+anti_patterns:
+  - "dark mode interfaces"
+  - "saturated neon colors"
+  - "decorative chartjunk"
+
+intent: "Information-dense clarity. Data speaks through organized visual hierarchy."

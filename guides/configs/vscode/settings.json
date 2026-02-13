@@ -1,6 +1,8 @@
 {
   /*** WINDOW & WORKBENCH ***/
   "window.zoomLevel": 2,
+  /*** TERMINAL ***/
+  "terminal.integrated.scrollback": 10000,
   "workbench.iconTheme": "material-icon-theme",
   "workbench.secondarySideBar.defaultVisibility": "hidden",
   "workbench.sideBar.location": "right",
@@ -18,7 +20,7 @@
   "editor.guides.highlightActiveBracketPair": false, // + dims line connecting brackets
   "editor.lightbulb.enabled": "off",
   "editor.minimap.enabled": false,
-  "editor.folding": false, // clean up the sidebar
+  "editor.folding": true,
   "editor.glyphMargin": false,
   "editor.accessibilitySupport": "off",
   "editor.autoClosingBrackets": "beforeWhitespace", // only auto-close brackets when before whitespace
@@ -38,7 +40,7 @@
     "source.sortImports": "never"
   },
   // BIOME
-  "biome.configurationPath": "/Users/m/biome.json",
+  "biome.configurationPath": "./guides/configs",
   "biome.suggestInstallingGlobally": false,
   /*
   - quick suggestion: suggest while typing
@@ -96,6 +98,10 @@
     "**/.pytest_cache": true,
     "**/*.egg-info": true
   },
+  "files.watcherExclude": {
+    "**/Library/Containers/**": true,
+    "**/Library/Group Containers/**": true
+  },
   "search.exclude": {
     "**/node_modules/**": true,
     "**/dist/**": true,
@@ -132,7 +138,7 @@
     "editor.unicodeHighlight.invisibleCharacters": false,
     "diffEditor.ignoreTrimWhitespace": false,
     "editor.wordWrap": "on",
-    "editor.wordWrapColumn": 80,
+    "editor.wordWrapColumn": 300,
     "editor.codeActionsOnSave": {
       "source.fixAll.markdownlint": "explicit"
     },
@@ -149,6 +155,7 @@
   "pgFormatter.commaEnd": false,
   "pgFormatter.noComment": false,
   "pgFormatter.formatType": true,
+  "pgFormatter.keywordCase": 1,
   /* typescript/javascript */
   "typescript.preferences.importModuleSpecifier": "shortest",
   "typescript.tsserver.log": "off",
@@ -214,10 +221,18 @@
   },
   /* css */
   "[css]": {
-    "editor.defaultFormatter": "biomejs.biome"
+    "editor.defaultFormatter": "biomejs.biome",
+    "editor.codeActionsOnSave": {
+      "source.fixAll.stylelint": "explicit"
+    }
   },
   "cssvar.enableHover": true,
   "css.validate": false,
+  "less.validate": false,
+  "scss.validate": false,
+  "stylelint.validate": [
+    "css"
+  ],
   "unocss.root": ".",
   "unocss.autocomplete.matchType": "fuzzy",
   "unocss.colorPreview": true,
@@ -279,5 +294,15 @@
   /* github actions */
   "[github-actions-workflow]": {
     "editor.defaultFormatter": "redhat.vscode-yaml"
+  },
+  "workbench.startupEditor": "welcomePage",
+  "task.allowAutomaticTasks": "on",
+  "json.schemaDownload.trustedDomains": {
+    "https://schemastore.azurewebsites.net/": true,
+    "https://raw.githubusercontent.com/": true,
+    "https://www.schemastore.org/": true,
+    "https://json.schemastore.org/": true,
+    "https://json-schema.org/": true,
+    "https://biomejs.dev": true
   }
 }

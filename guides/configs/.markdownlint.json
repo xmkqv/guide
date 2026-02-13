@@ -1,5 +1,8 @@
 {
   "default": true,
+  "MD055": false,
+  "MD056": false,
+  "MD060": false,
   "MD003": {
     "style": "atx"
   },
@@ -18,9 +21,7 @@
   "MD024": false,
   "MD025": false,
   "MD026": false,
-  "MD029": {
-    "style": "ordered"
-  },
+  "MD029": false,
   "MD033": false,
   "MD034": false,
   "MD035": {

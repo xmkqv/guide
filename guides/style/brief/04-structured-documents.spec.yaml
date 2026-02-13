@@ -1,0 +1,38 @@
+source: "04-structured-documents.jpg"
+extracted_at: "2025-12-05T09:15:00Z"
+
+palette:
+  dominant:
+    - { hex: "#2a3028", weight: 0.35, name: "olive-black" }
+    - { hex: "#ffffff", weight: 0.40, name: "paper" }
+    - { hex: "#f5f0e8", weight: 0.10, name: "cream" }
+  accent:
+    - { hex: "#d4a020", weight: 0.08, name: "amber" }
+    - { hex: "#e8d070", weight: 0.04, name: "sticky" }
+    - { hex: "#1a1a18", weight: 0.03, name: "ink" }
+
+composition:
+  balance: 0.0
+  density: 0.6
+  focal_points: [[0.6, 0.5, 0.7], [0.3, 0.4, 0.5]]
+
+texture:
+  grain: 0.2
+  organic: 0.1
+
+affect:
+  temperature: 0.2
+  weight: 0.5
+  energy: 0.3
+
+influences:
+  - "financial documentation"
+  - "structured analysis"
+  - "Edward Tufte principles"
+
+anti_patterns:
+  - "decorative elements"
+  - "unnecessary color"
+  - "visual clutter"
+
+intent: "Analytical rigor. Structure reveals meaning through organized presentation."

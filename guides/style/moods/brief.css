@@ -1,0 +1,321 @@
+/*
+ * Mood: brief
+ * Intent: Technical confidence through restraint. Warm authority.
+ * Composed: 2025-12-05
+ */
+
+:root {
+  /* Color Tokens - Surface */
+  --color-surface: #f8f7f4;
+  --color-surface-elevated: #ffffff;
+  --color-surface-muted: #eeecea;
+
+  /* Color Tokens - Text */
+  --color-text: #1a1a18;
+  --color-text-muted: #5a6268;
+  --color-text-subtle: #8a8a8a;
+
+  /* Color Tokens - Accent */
+  --color-accent: #2d8a7a;
+  --color-accent-muted: #4a9a8a;
+  --color-amber: #c4854a;
+
+  /* Color Tokens - Semantic */
+  --color-success: #3a7a5a;
+  --color-success-muted: #e8f2ec;
+  --color-warning: #9a7a3a;
+  --color-warning-muted: #f8f4e8;
+  --color-error: #8a4a4a;
+  --color-error-muted: #f8eaea;
+  --color-info: #4a6a8a;
+  --color-info-muted: #e8f0f8;
+
+  /* Color Tokens - Border */
+  --color-border: #dcdad6;
+  --color-border-muted: #eae8e4;
+
+  /* Typography Tokens - Families */
+  --ff-heading: "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+  --ff-body: "Source Sans 3", "Source Sans Pro", system-ui, sans-serif;
+  --ff-mono: "SF Mono", "Menlo", "Monaco", monospace;
+
+  /* Typography Tokens - Scale (ratio 1.2) */
+  --fs-xs: 0.694rem;
+  --fs-sm: 0.833rem;
+  --fs-base: 1rem;
+  --fs-md: 1.2rem;
+  --fs-lg: 1.44rem;
+  --fs-xl: 1.728rem;
+  --fs-2xl: 2.074rem;
+  --fs-3xl: 2.488rem;
+
+  /* Typography Tokens - Weight */
+  --fw-normal: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+
+  /* Typography Tokens - Line Height */
+  --lh-tight: 1.2;
+  --lh-base: 1.5;
+  --lh-relaxed: 1.65;
+
+  /* Spacing Tokens */
+  --space-0: 0;
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-24: 6rem;
+
+  /* Layout Tokens */
+  --layout-max: 72rem;
+  --layout-content: 48rem;
+  --layout-sidebar: 16rem;
+  --layout-gutter: 1.5rem;
+}
+
+/* Base Element Styles */
+
+section {
+  inline-size: var(--comm-width, 100%);
+  block-size: var(--comm-height, auto);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: var(--ff-body);
+  font-size: var(--fs-base);
+  line-height: var(--lh-base);
+  /* Screen margins - @media print zeroes this, @page handles print margins */
+  padding: var(--space-8);
+}
+
+h1 {
+  font-family: var(--ff-heading);
+  font-size: var(--fs-3xl);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-tight);
+  color: var(--color-text);
+  margin-block-end: var(--space-6);
+  letter-spacing: -0.02em;
+}
+
+h2 {
+  font-family: var(--ff-heading);
+  font-size: var(--fs-xl);
+  font-weight: var(--fw-semibold);
+  line-height: var(--lh-tight);
+  color: var(--color-text);
+  margin-block-start: var(--space-8);
+  margin-block-end: var(--space-4);
+  letter-spacing: -0.01em;
+}
+
+main {
+  max-inline-size: var(--layout-content);
+  margin-inline: auto;
+  padding-inline: var(--layout-gutter);
+}
+
+aside {
+  inline-size: var(--layout-sidebar);
+  padding: var(--space-6);
+  background: var(--color-surface-muted);
+  border-inline-start: 1px solid var(--color-border);
+  font-size: var(--fs-sm);
+  color: var(--color-text-muted);
+}
+
+footer {
+  margin-block-start: var(--space-12);
+  padding-block: var(--space-6);
+  border-block-start: 1px solid var(--color-border);
+  font-size: var(--fs-sm);
+  color: var(--color-text-muted);
+}
+
+figure {
+  margin-block: var(--space-6);
+  padding: var(--space-4);
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border-muted);
+  border-radius: 2px;
+}
+
+figure figcaption {
+  margin-block-start: var(--space-3);
+  font-size: var(--fs-sm);
+  color: var(--color-text-muted);
+  font-family: var(--ff-body);
+}
+
+/* Data Presentation */
+
+table {
+  inline-size: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+th {
+  font-family: var(--ff-heading);
+  font-weight: var(--fw-semibold);
+  font-size: var(--fs-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+  text-align: start;
+  padding: var(--space-2) var(--space-3);
+  border-block-end: 2px solid var(--color-border);
+}
+
+td {
+  padding: var(--space-2) var(--space-3);
+  border-block-end: 1px solid var(--color-border-muted);
+  vertical-align: baseline;
+}
+
+/* Code and Data */
+
+code {
+  font-family: var(--ff-mono);
+  font-size: 0.9em;
+  background: var(--color-surface-muted);
+  padding: 0.1em 0.3em;
+  border-radius: 2px;
+}
+
+pre {
+  font-family: var(--ff-mono);
+  font-size: var(--fs-sm);
+  line-height: var(--lh-relaxed);
+  background: var(--color-surface-muted);
+  padding: var(--space-4);
+  overflow-x: auto;
+  border-radius: 2px;
+}
+
+/* Utility Classes */
+
+.accent {
+  color: var(--color-accent);
+}
+
+.muted {
+  color: var(--color-text-muted);
+}
+
+.surface-elevated {
+  background: var(--color-surface-elevated);
+}
+
+.border {
+  border: 1px solid var(--color-border);
+}
+
+.text-sm {
+  font-size: var(--fs-sm);
+}
+
+.text-xs {
+  font-size: var(--fs-xs);
+}
+
+.font-mono {
+  font-family: var(--ff-mono);
+}
+
+.font-heading {
+  font-family: var(--ff-heading);
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Semantic Status */
+
+.status-success {
+  color: var(--color-success);
+  background: var(--color-success-muted);
+}
+
+.status-warning {
+  color: var(--color-warning);
+  background: var(--color-warning-muted);
+}
+
+.status-error {
+  color: var(--color-error);
+  background: var(--color-error-muted);
+}
+
+.status-info {
+  color: var(--color-info);
+  background: var(--color-info-muted);
+}
+
+/* Data Visualization Hints */
+
+.chart-primary { fill: var(--color-accent); stroke: var(--color-accent); }
+.chart-secondary { fill: var(--color-amber); stroke: var(--color-amber); }
+.chart-tertiary { fill: var(--color-info); stroke: var(--color-info); }
+.chart-muted { fill: var(--color-text-subtle); stroke: var(--color-text-subtle); }
+
+/* Print Optimizations */
+
+@media print {
+  section {
+    /* Keep padding for text inset from colored background edge */
+  }
+
+  h2 {
+    margin-block-start: 0.75rem;
+    margin-block-end: 0.375rem;
+  }
+
+  p {
+    margin-block-end: 0.375rem;
+  }
+
+  table {
+    margin-block: 0.5rem;
+  }
+
+  th, td {
+    padding: 0.25rem 0.5rem;
+  }
+
+  figure {
+    margin-block: 0.5rem;
+    padding: 0.5rem;
+  }
+
+  pre {
+    padding: 0.5rem;
+    margin-block: 0.25rem;
+  }
+
+  ul {
+    margin-block: 0.375rem;
+  }
+
+  li {
+    margin-block-end: 0;
+  }
+
+  footer {
+    margin-block-start: 1rem;
+    page-break-before: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Allow tables to break to use available space */
+  table {
+    page-break-inside: auto;
+  }
+}

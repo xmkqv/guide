@@ -1,0 +1,80 @@
+_meta:
+  sources:
+    - 01-corporate-hallway.spec.yaml
+    - 02-light-dashboard.spec.yaml
+    - 03-document-signing.spec.yaml
+    - 04-structured-documents.spec.yaml
+  composed_at: "2025-12-05T09:20:00Z"
+
+intent: |
+  Technical confidence through restraint. Warm authority that commands
+  attention without demanding it. Information-dense presentation where
+  data speaks clearly through organized hierarchy and purposeful color.
+
+mood: "assured technical authority"
+
+palette:
+  dominant:
+    - { hex: "#f8f7f4", name: "surface" }
+    - { hex: "#1a1a18", name: "ink" }
+    - { hex: "#3a4a5c", name: "slate" }
+  accent:
+    - { hex: "#2d8a7a", name: "teal" }       # IMPORTANT - primary data color
+    - { hex: "#c4854a", name: "amber" }      # warm highlight
+  semantic:
+    surface: "#f8f7f4"
+    surface-elevated: "#ffffff"
+    surface-muted: "#eeecea"
+    text: "#1a1a18"
+    text-muted: "#5a6268"
+    text-subtle: "#8a8a8a"
+    accent: "#2d8a7a"
+    accent-muted: "#4a9a8a"
+    success: "#3a7a5a"
+    success-muted: "#e8f2ec"
+    warning: "#9a7a3a"
+    warning-muted: "#f8f4e8"
+    error: "#8a4a4a"
+    error-muted: "#f8eaea"
+    info: "#4a6a8a"
+    info-muted: "#e8f0f8"
+    border: "#dcdad6"
+    border-muted: "#eae8e4"
+
+typography:
+  families:
+    - "Helvetica Neue"     # neo-grotesque headings
+    - "Source Sans 3"      # humanist body
+    - "SF Mono"            # monospace data
+  scale:
+    base: "1rem"
+    ratio: 1.2             # minor third - dense but readable
+  weights:
+    normal: 400
+    medium: 500
+    semibold: 600
+    bold: 700
+
+spacing:
+  base: 8
+  scale: [0, 4, 8, 12, 16, 24, 32, 48, 64, 96]
+
+layout:
+  max_width: "72rem"
+  content_width: "48rem"
+  sidebar_width: "16rem"
+  grid_columns: 12
+  gutter: "1.5rem"
+
+influences:
+  - "McKinsey presentation clarity"
+  - "Edward Tufte data density"
+  - "BCG visual hierarchy"
+  - "Scandinavian corporate restraint"
+
+anti_patterns:
+  - "dark UI themes"
+  - "saturated neon colors"
+  - "decorative chartjunk"
+  - "casual informal aesthetics"
+  - "excessive whitespace at expense of content"

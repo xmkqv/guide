@@ -1,34 +1,52 @@
 /**
- * Doc: US Letter portrait
- * Stage only. Aesthetics in mood.css.
+ * Comm: doc
+ * Format: US Letter portrait (8.5in × 11in)
+ *
+ * Owns: Frame geometry, @page rules
+ * Aesthetics: Handled by mood.css (import after this file)
+ *
+ * Margin strategy: Two-layer system
+ * - Screen: mood.css section { padding } provides margins
+ * - Print: @page { margin } handles spacing, mood.css zeroes section padding
+ * - body has zero margin/padding (no double-margin)
+ *
+ * @page uses literal values because CSS variables don't work in @page rules.
  */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
 
 :root {
   --comm-width: 8.5in;
   --comm-height: 11in;
   --comm-aspect: 8.5 / 11;
-  --comm-margin: 1in;
+  --comm-margin: 0.6in;
 }
 
 @page {
   size: letter portrait;
-  margin: var(--comm-margin);
+  margin: 0.6in;
 }
 
 body {
   margin: 0;
+  padding: 0;
 }
 
 @media print {
+  /* Prevent headings from being orphaned at page bottom */
   h1, h2, h3, h4, h5, h6 {
     page-break-after: avoid;
   }
 
+  /* Minimum lines before/after page break */
   p, li {
     orphans: 2;
     widows: 2;
   }
 
+  /* Keep these elements together */
   table, figure, blockquote, pre {
     page-break-inside: avoid;
   }

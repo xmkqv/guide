@@ -1,6 +1,13 @@
 /**
- * CV: US Letter portrait, tight
- * Stage only. Aesthetics in mood.css.
+ * Comm: cv
+ * Format: US Letter portrait (8.5in × 11in), tight margins
+ *
+ * Owns: Frame geometry, @page rules
+ * Aesthetics: Handled by mood.css (import after this file)
+ *
+ * Margin strategy: @page-based
+ * - @page margin handles all page spacing
+ * - body has zero margin/padding
  */
 
 :root {
@@ -12,15 +19,21 @@
 
 @page {
   size: letter portrait;
-  margin: var(--comm-margin);
+  margin: 0.5in 0.6in;
 }
 
 body {
   margin: 0;
+  padding: 0;
 }
 
 @media print {
+  /* Keep CV sections together */
   section, article {
     page-break-inside: avoid;
+  }
+
+  h1, h2, h3 {
+    page-break-after: avoid;
   }
 }

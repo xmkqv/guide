@@ -1,5 +1,5 @@
 {
-	"root": false,
+	"root": true,
 	"$schema": "https://biomejs.dev/schemas/2.3.6/schema.json",
 	"vcs": {
 		"enabled": true,
@@ -31,6 +31,16 @@
 		"enabled": true,
 		"rules": {
 			"recommended": true
+		}
+	},
+	"assist": {
+		"enabled": true,
+		"actions": {
+			"source": {
+				"organizeImports": {
+					"level": "on"
+				}
+			}
 		}
 	},
 	"javascript": {

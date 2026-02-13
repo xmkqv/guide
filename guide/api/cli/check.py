@@ -7,8 +7,9 @@ import sys
 import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Protocol
+from typing import Annotated
 
+import tyro
 from pydantic import BaseModel
 from rich.console import Console
 from rich.status import Status
@@ -66,15 +67,6 @@ class ClaudeCodeHookResponse(BaseModel):
 
 
 @dataclass
-class MarkdownIssue:
-    """A markdown validation issue."""
-
-    line: int
-    column: int
-    message: str
-
-
-@dataclass
 class LintResult:
     """Result from running a linter."""
 
@@ -88,44 +80,48 @@ class LintResult:
 class ValidationResult:
     """Combined validation results."""
 
-    markdown_issues: list[MarkdownIssue] = field(default_factory=list[MarkdownIssue])
     lint_results: list[LintResult] = field(default_factory=list[LintResult])
     has_errors: bool = False
-    formatted_content: str = ""
     was_formatted: bool = False
-
-
-class Linter(Protocol):
-    """Protocol for linter implementations."""
-
-    def name(self) -> str: ...
-    def applies(self, ext: str) -> bool: ...
-    async def run(self, file_path: str, cfg: Config) -> LintResult: ...
-
-
-class Formatter(Protocol):
-    """Protocol for formatter implementations."""
-
-    def name(self) -> str: ...
-    def applies(self, ext: str) -> bool: ...
-    async def format(self, file_path: str, cfg: Config) -> None: ...
 
 
 BOLD_ASTERISK = re.compile(r"\*\*[^*]+\*\*")
 BOLD_UNDERSCORE = re.compile(r"__[^_]+__")
 
 
-def check_markdown_bold(content: str) -> list[MarkdownIssue]:
-    """Check for bold text patterns in markdown content."""
-    issues: list[MarkdownIssue] = []
-    for i, line in enumerate(content.split("\n"), 1):
-        for m in BOLD_ASTERISK.finditer(line):
-            issue = MarkdownIssue(i, m.start() + 1, f"Bold ** not allowed: {m.group()}")
-            issues.append(issue)
-        for m in BOLD_UNDERSCORE.finditer(line):
-            issue = MarkdownIssue(i, m.start() + 1, f"Bold __ not allowed: {m.group()}")
-            issues.append(issue)
-    return issues
+def strip_markdown_bold(content: str) -> tuple[str, bool]:
+    """Strip bold text patterns from markdown content."""
+    stripped = BOLD_ASTERISK.sub(lambda m: m.group()[2:-2], content)
+    stripped = BOLD_UNDERSCORE.sub(lambda m: m.group()[2:-2], stripped)
+    return stripped, stripped != content
+
+
+def label_code_fences(content: str) -> tuple[str, bool]:
+    """Add 'text' label to unlabeled opening code fences."""
+    lines = content.split("\n")
+    result: list[str] = []
+    in_fence = False
+    modified = False
+
+    for line in lines:
+        stripped = line.rstrip()
+        if stripped.startswith("```"):
+            if not in_fence:
+                # Opening fence
+                if stripped == "```" or stripped == "``` ":
+                    result.append("```text")
+                    modified = True
+                else:
+                    result.append(line)
+                in_fence = True
+            else:
+                # Closing fence
+                result.append(line)
+                in_fence = False
+        else:
+            result.append(line)
+
+    return "\n".join(result), modified
 
 
 DEFAULT_TIMEOUT = 30.0
@@ -158,6 +154,7 @@ async def run_cmd(name: str, args: list[str]) -> LintResult:
 JS_EXTS = frozenset({"js", "jsx", "ts", "tsx", "mjs", "cjs"})
 MD_EXTS = frozenset({"md", "markdown"})
 PY_EXTS = frozenset({"py", "pyi"})
+C4_EXTS = frozenset({"c4"})
 
 
 async def run_biome(file_path: str, cfg: Config) -> LintResult:
@@ -202,6 +199,15 @@ async def run_pyright(file_path: str, cfg: Config) -> LintResult:
     return await run_cmd("pyright", args)
 
 
+async def run_markdownlint_fix(file_path: str, cfg: Config) -> None:
+    """Run markdownlint --fix on markdown files."""
+    args = ["--fix"]
+    if cfg.markdownlint_config:
+        args.extend(["-c", cfg.markdownlint_config])
+    args.append(file_path)
+    await run_cmd("markdownlint", args)
+
+
 async def run_markdownlint(file_path: str, cfg: Config) -> LintResult:
     """Run markdownlint on markdown files."""
     args: list[str] = []
@@ -209,6 +215,15 @@ async def run_markdownlint(file_path: str, cfg: Config) -> LintResult:
         args.extend(["-c", cfg.markdownlint_config])
     args.append(file_path)
     return await run_cmd("markdownlint", args)
+
+
+async def run_likec4(file_path: str, _cfg: Config) -> LintResult:
+    """Run likec4 validate on C4 files.
+
+    Note: LikeC4 validates directories, so we pass the parent directory.
+    """
+    parent_dir = str(Path(file_path).parent)
+    return await run_cmd("likec4", ["validate", parent_dir])
 
 
 def get_ext(file_path: str) -> str:
@@ -229,6 +244,8 @@ def _create_lint_tasks(
         ]
     if ext in MD_EXTS:
         return [asyncio.create_task(run_markdownlint(tmp_path, cfg))]
+    if ext in C4_EXTS:
+        return [asyncio.create_task(run_likec4(tmp_path, cfg))]
     return []
 
 
@@ -254,16 +271,28 @@ async def validate_file(
     result = ValidationResult()
     ext = get_ext(file_path)
 
-    if not ext or not content:
+    if not ext:
         return result
 
-    if ext in MD_EXTS:
-        issues = check_markdown_bold(content)
-        if issues:
-            result.markdown_issues = issues
-            result.has_errors = True
+    if not content and not is_edit:
+        return result
 
-    if is_edit:
+    # For Edit operations, read full content from disk
+    if is_edit and file_path:
+        disk_path = Path(file_path)
+        if disk_path.exists():
+            content = disk_path.read_text()
+        else:
+            return result
+
+    original_content = content
+    if ext in MD_EXTS:
+        content, _ = strip_markdown_bold(content)
+        content, _ = label_code_fences(content)
+
+    # C4 files: validate original directory (likec4 validates dirs, not files)
+    if ext in C4_EXTS:
+        await _run_linters(ext, file_path, cfg, result)
         return result
 
     with tempfile.NamedTemporaryFile(mode="w", suffix=f".{ext}", delete=False) as tmp:
@@ -273,26 +302,19 @@ async def validate_file(
     try:
         if ext in PY_EXTS:
             await run_ruff_format(tmp_path, cfg)
+        if ext in MD_EXTS:
+            await run_markdownlint_fix(tmp_path, cfg)
 
         await _run_linters(ext, tmp_path, cfg, result)
 
         formatted = Path(tmp_path).read_text()
-        if formatted != content:
-            result.formatted_content = formatted
+        if formatted != original_content:
             result.was_formatted = True
+            Path(file_path).write_text(formatted)
     finally:
         Path(tmp_path).unlink(missing_ok=True)
 
     return result
-
-
-def _format_markdown_issues(issues: list[MarkdownIssue]) -> list[str]:
-    """Format markdown issues for output."""
-    lines = ["\nMarkdown validation errors:"]
-    lines.extend(
-        f"  Line {issue.line}, Col {issue.column}: {issue.message}" for issue in issues
-    )
-    return lines
 
 
 def _format_lint_errors(lint_results: list[LintResult]) -> list[str]:
@@ -314,8 +336,6 @@ def _build_context(result: ValidationResult) -> list[str]:
     parts: list[str] = []
     if result.was_formatted:
         parts.append("Content was auto-formatted")
-    if result.markdown_issues:
-        parts.extend(_format_markdown_issues(result.markdown_issues))
     parts.extend(_format_lint_errors(result.lint_results))
     return parts
 
@@ -373,11 +393,6 @@ def display_result(console: Console, result: ValidationResult) -> None:
             console.print("[green]All checks passed[/green]")
         return
 
-    if result.markdown_issues:
-        console.print("\n[red]Markdown validation errors:[/red]")
-        for issue in result.markdown_issues:
-            console.print(f"  Line {issue.line}, Col {issue.column}: {issue.message}")
-
     _display_lint_errors(console, result.lint_results)
 
     console.print("\n" + "=" * 60)
@@ -389,7 +404,7 @@ def display_result(console: Console, result: ValidationResult) -> None:
 class Check:
     """Run validation on files."""
 
-    files: list[str] = field(default_factory=list[str])
+    files: Annotated[list[str], tyro.conf.Positional] = field(default_factory=list[str])
     hook: bool = False
 
 
