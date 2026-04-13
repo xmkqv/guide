@@ -106,6 +106,31 @@ def inject(target: Path, *chunks: str):
     target.write_text(content)
 
 
+def make_watch_filter(root: Path):
+    """DefaultFilter extended with .gitignore patterns. Reusable across watchers."""
+    import fnmatch
+
+    from watchfiles import DefaultFilter  # type: ignore[import-untyped]
+
+    extra_dirs: list[str] = []
+    extra_patterns: list[str] = []
+    gitignore = root / ".gitignore"
+    if gitignore.exists():
+        for raw in gitignore.read_text().splitlines():
+            line = raw.strip()
+            if not line or line.startswith("#") or line.startswith("!"):
+                continue
+            if line.endswith("/"):
+                extra_dirs.append(line.rstrip("/"))
+            else:
+                extra_patterns.append(fnmatch.translate(line))
+
+    return DefaultFilter(
+        ignore_dirs=[*DefaultFilter.ignore_dirs, *extra_dirs],
+        ignore_entity_patterns=[*DefaultFilter.ignore_entity_patterns, *extra_patterns],
+    )
+
+
 class AutoDir(Enum):
     _base_: Path
 

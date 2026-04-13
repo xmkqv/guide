@@ -1,9 +1,10 @@
 ---
+description: Rust Style Guide
 paths:
-  - "./**/*.rs"
+  - "**/*.rs"
 ---
 
-Write declarative, robust, & self-explanatory Rust. No comments.
+Declarative, robust, self-explanatory Rust. No comments.
 
 ```rust
 use std::collections::HashMap;
@@ -21,7 +22,9 @@ impl Handler {
 }
 ```
 
-Prefer for-loops over iterator chains. Explicit control flow reads cleaner.
+# Control Flow
+
+for-loops > iterator chains
 
 ```rust
 let mut results = Vec::new();
@@ -32,19 +35,17 @@ for item in items {
 }
 ```
 
-Use let-else for early returns. Guards belong at the top.
+let-else for early returns; guards at top
 
 ```rust
 let Some(user) = users.get(&id) else {
     return Err(Error::NotFound);
 };
-
-let Ok(parsed) = input.parse::<u64>() else {
-    return Err(Error::InvalidInput);
-};
 ```
 
-Shadow variables freely. Reuse names when the purpose stays the same.
+# Shadowing
+
+shadow freely; reuse names when purpose unchanged
 
 ```rust
 let config = load_raw_config()?;
@@ -52,7 +53,9 @@ let config = parse_config(config)?;
 let config = validate_config(config)?;
 ```
 
-Use newtypes for domain concepts. Primitives leak meaning.
+# Newtypes
+
+newtypes for domain concepts; primitives leak meaning
 
 ```rust
 pub struct UserId(pub i64);
@@ -62,14 +65,12 @@ pub struct Bytes(pub Vec<u8>);
 fn fetch_user(id: UserId) -> Result<User> { ... }
 ```
 
-Match exhaustively. Let the compiler catch missing cases.
+# Matching
+
+exhaustive match; let compiler catch missing cases
 
 ```rust
-enum Command {
-    Start,
-    Stop,
-    Restart,
-}
+enum Command { Start, Stop, Restart }
 
 match cmd {
     Command::Start => start(),
@@ -78,7 +79,7 @@ match cmd {
 }
 ```
 
-Use discriminated enums for state machines.
+discriminated enums for state machines
 
 ```rust
 enum Connection {
@@ -89,7 +90,9 @@ enum Connection {
 }
 ```
 
-Propagate errors with `?`. Handle them at boundaries.
+# Errors
+
+propagate with `?`; handle at boundaries
 
 ```rust
 fn load_config(path: &Path) -> Result<Config> {
@@ -99,7 +102,7 @@ fn load_config(path: &Path) -> Result<Config> {
 }
 ```
 
-Define custom error types. Context matters.
+custom error types; context matters
 
 ```rust
 #[derive(Debug, thiserror::Error)]
@@ -113,8 +116,7 @@ pub enum Error {
 }
 ```
 
-# Reminders
-
-No tautological comments
-No unsafe without justification
-No unwrap in library code
+invs:
+  ¬ tautological comments
+  ¬ unsafe without justification
+  ¬ unwrap in library code

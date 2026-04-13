@@ -2,6 +2,7 @@
 title: Gist Preview
 task: Create public GitHub gist with preview link for HTML files
 allowed-tools: Bash(gh gist:*)
+disable-model-invocation: true
 ---
 
 # Create Gist with Preview Link
